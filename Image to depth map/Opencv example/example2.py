@@ -45,6 +45,8 @@ filteredImg = cv2.normalize(src=filteredImg, dst=filteredImg, beta=0, alpha=255,
 filteredImg = np.uint8(filteredImg)
 #cv2.imshow('Disparity Map', filteredImg)
 #cv2.waitKey()
+#cv2.imwrite("Testl.jpg", left_matcher)
+#cv2.imwrite("Testr.jpg", right_matcher)
 cv2.imwrite("Test.jpg", filteredImg)
 del imgL
 del imgR
