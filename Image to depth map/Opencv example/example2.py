@@ -3,8 +3,8 @@ from sklearn.preprocessing import normalize
 import cv2
  
 print('loading images...')
-imgL = cv2.imread('Left2.jpg')  # downscale images for faster processing
-imgR = cv2.imread('Right2.jpg')
+imgL = cv2.imread('Left1.jpg')  # downscale images for faster processing
+imgR = cv2.imread('Right1.jpg')
  
 # SGBM Parameters -----------------
 window_size = 3                     # wsize default 3; 5; 7 for SGBM reduced size image; 15 for SGBM full size image (1300px and above); 5 Works nicely
