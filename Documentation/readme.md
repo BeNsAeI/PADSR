@@ -1,0 +1,14 @@
+- Project proposal
+- Problem statement
+- Requirments document
+- Tech review
+- Design document
+- Progress report 1
+- Progress report 2
+- Progress report 3
+- Progress report 4
+- Progress report 5
+- Progress report 6
+- Final report
+- Final documentation
+- Closure
