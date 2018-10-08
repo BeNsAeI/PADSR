@@ -21,6 +21,8 @@ left_matcher = cv2.StereoSGBM_create(
     speckleRange=2,
     preFilterCap=63,
     mode=cv2.STEREO_SGBM_MODE_SGBM_3WAY
+    #mode=cv2.STEREO_BM_BASIC_PRESET,
+    #SADWindowSize=15
 )
  
 right_matcher = cv2.ximgproc.createRightMatcher(left_matcher)
