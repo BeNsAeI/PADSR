@@ -43,10 +43,10 @@ def center(image):
         # show the image
         # cv2.imshow("Image", image)
 
-    if blobsCounter == 0:
-        print('No object detected')
-    else:
-        print('Objects detected: ', blobsCounter)
+    # if blobsCounter == 0:
+    #     print('No object detected')
+    # else:
+    #     print('Objects detected: ', blobsCounter)
         # print(coordinates)
     # cv2.imwrite("results/blobdetection_centers.jpg", image)
     # cv2.waitKey(0)
@@ -84,22 +84,22 @@ cv2.imwrite("results/blobdetection_image2.jpg", image2)
 ########### Find out if the camera goes to the left or right #################
 xCoord = []
 # yCoord = []
-test = 0
+xCoordSum = 0
 
 if len(results1) < len(results2):
     for i in range(len(results1)):
         xCoord.append(results1[i][0] - results2[i][0])
         # yCoord.append(results1[i][1] - results2[i][1])
-        test = test + xCoord[i]
+        xCoordSum = xCoordSum + xCoord[i]
 else:
     for i in range(len(results2)):
         xCoord.append(results1[i][0] - results2[i][0])
-        test = test + xCoord[i]
+        xCoordSum = xCoordSum + xCoord[i]
         # yCoord.append(results1[i][1] - results2[i][1])
 
 # print(xCoord)
-print(test)
-if test > 0:
+print('x coordinates sum: ', xCoordSum)
+if xCoordSum > 0:
     print("camera goes to the right")
 else:
     print('camera goes to the left')
