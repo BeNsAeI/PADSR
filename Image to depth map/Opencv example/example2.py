@@ -3,8 +3,8 @@ from sklearn.preprocessing import normalize
 import cv2
  
 print('loading images...')
-imgL = cv2.imread('Left2.jpg')  # downscale images for faster processing
-imgR = cv2.imread('Right2.jpg')
+imgL = cv2.imread('Left5.jpg')
+imgR = cv2.imread('Right5.jpg')
  
 # SGBM Parameters -----------------
 window_size = 3                     # wsize default 3; 5; 7 for SGBM reduced size image; 15 for SGBM full size image (1300px and above); 5 Works nicely
@@ -45,11 +45,11 @@ filteredImg = wls_filter.filter(displ, imgL, None, dispr)  # important to put "i
  
 filteredImg = cv2.normalize(src=filteredImg, dst=filteredImg, beta=0, alpha=255, norm_type=cv2.NORM_MINMAX);
 filteredImg = np.uint8(filteredImg)
-#cv2.imshow('Disparity Map', filteredImg)
-#cv2.waitKey()
-#cv2.imwrite("Testl.jpg", left_matcher)
-#cv2.imwrite("Testr.jpg", right_matcher)
-cv2.imwrite("Test.jpg", filteredImg)
+cv2.imshow('Disparity Map', filteredImg)
+cv2.waitKey()
+cv2.imwrite("Testl.jpg", left_matcher)
+cv2.imwrite("Testr.jpg", right_matcher)
+cv2.imwrite("Test5.jpg", filteredImg)
 del imgL
 del imgR
 del displ
