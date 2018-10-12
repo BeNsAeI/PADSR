@@ -1,4 +1,5 @@
 import cv2
+
 import numpy as np
 import os
 
@@ -25,10 +26,16 @@ class VideoConverter(object):
             raise ValueError("Failed to read file %s" % input_file)
 
         # Set the output video parameters
-        fourcc = cv2.VideoWriter_fourcc(*'mp4v')
+        fourcc = cv2.VideoWriter_fourcc(*'DIVX')
         fps = capture.get(cv2.CAP_PROP_FPS)
         width = 600
         height = 400
+	#if flag =='h':
+        #    width = 1200
+        #    height = 800
+        #if flag == 'l':
+        #    width = 300
+        #    height = 200
         is_color = 0 # save depth map video in grayscale
         out = cv2.VideoWriter(output_file, fourcc, fps, (width, height), is_color)
 
@@ -40,6 +47,8 @@ class VideoConverter(object):
 
         while capture.isOpened():
             # Capture frame-by-frame
+            capture.read()
+            capture.read()
             ret, next_frame = capture.read()
             if not ret:
                 print "No frames to read, exit loop"
@@ -52,12 +61,13 @@ class VideoConverter(object):
             if previous_frame is not None and next_frame is not None:
                 # Create a depth map
                 depth_map = create_depth_map(previous_frame, next_frame)
+		#depth_map = cv2.resize(depth_map, (width, height), interpolation=cv2.INTER_LINEAR)
                 # Write the result to video file
                 out.write(depth_map)
                 depthmap_count += 1
 
             previous_frame = next_frame
-            frame_count += 1
+            frame_count += 3
 
         print "Finished video processing. Frames: %s, Depth maps: %s" % (frame_count, depthmap_count)
 
@@ -66,56 +76,34 @@ class VideoConverter(object):
         cv2.destroyAllWindows()
 
 def create_depth_map(imgL, imgR):
-    """
-    Temporary function copied from 'Image to depth map'/example2.
-    Will be removed after integration with other modules.
-    """
-    if imgL is None or imgR is None:
-        raise ValueError("Please check the parameters")
-
-    # SGBM Parameters -----------------
-    window_size = 5 # wsize default 3; 5; 7 for SGBM reduced size image; 15 for SGBM full size image (1300px and above); 5 Works nicely
-
-    left_matcher = cv2.StereoSGBM_create(
-        minDisparity=0,
-        numDisparities=160, # max_disp has to be dividable by 16 f. E. HH 192, 256
-        blockSize=5,
-        P1=8 * 3 * window_size ** 2,
-        P2=32 * 3 * window_size ** 2,
-        disp12MaxDiff=1,
-        uniquenessRatio=15,
-        speckleWindowSize=0,
-        speckleRange=2,
-        preFilterCap=63,
-        mode=cv2.STEREO_SGBM_MODE_SGBM_3WAY
+    margin = width/2
+    imgL=cv2.copyMakeBorder(imgL, top=0, bottom=0, left=margin, right=0, borderType= cv2.BORDER_CONSTANT, value=[0,0,0] )
+    imgR=cv2.copyMakeBorder(imgR, top=0, bottom=0, left=margin, right=0, borderType= cv2.BORDER_CONSTANT, value=[0,0,0] )
+    # disparity range is tuned for 'aloe' image pair
+    window_size = 3
+    min_disp = 16
+    max_disp = 128
+    num_disp = max_disp-min_disp
+    stereo = cv2.StereoSGBM_create(minDisparity = min_disp,
+        numDisparities = num_disp,
+        blockSize = 8,
+        P2 = 8*3*window_size**2,
+        P1 = 32*3*window_size**2,
+        disp12MaxDiff = 1,
+        uniquenessRatio = 10,
+        speckleWindowSize = 100,
+        speckleRange = 32
     )
-
-    right_matcher = cv2.ximgproc.createRightMatcher(left_matcher)
-
-    # FILTER Parameters
-    lmbda = 80000
-    sigma = 1.2
-    visual_multiplier = 1.0
-
-    wls_filter = cv2.ximgproc.createDisparityWLSFilter(matcher_left=left_matcher)
-    wls_filter.setLambda(lmbda)
-    wls_filter.setSigmaColor(sigma)
-
-    displ = left_matcher.compute(imgL, imgR)  # .astype(np.float32)/16
-    dispr = right_matcher.compute(imgR, imgL)  # .astype(np.float32)/16
-    displ = np.int16(displ)
-    dispr = np.int16(dispr)
-    filteredImg = wls_filter.filter(displ, imgL, None, dispr)  # important to put "imgL" here!!!
-
-    filteredImg = cv2.normalize(src=filteredImg, dst=filteredImg, beta=0, alpha=255, norm_type=cv2.NORM_MINMAX);
-    filteredImg = np.uint8(filteredImg)
-    del displ
-    del dispr
-    del left_matcher
-    del right_matcher
-    del wls_filter
-    return filteredImg
+    disp = stereo.compute(imgL, imgR).astype(np.float32) / 16.0
+    disp = disp[:,margin:]
+    disp = np.uint8((disp))
+    #cv2.imshow('disparity', (disp-min_disp)/num_disp)
+    #cv2.waitKey()
+    #cv2.destroyAllWindows()
+    #exit()
+    #print(disp.shape)
+    return disp
 
 if __name__ == "__main__":
     converter = VideoConverter()
-    converter.convert_video("../Video to image/example.mp4", "out.mp4")
+    converter.convert_video("../../Video to image/example.mp4", "out.avi")
