@@ -1,0 +1,10 @@
+code from: https://github.com/yifjiang/relative-depth-using-pytorch 
+
+Generates a depth map from a single image, after being trained on a labeled image-depth map dataset
+
+http://www-personal.umich.edu/~wfchen/depth-in-the-wild/ 
+
+Sample Usage:
+python test_on_one_image_cpu.py -prev_model_file model-weights/Best_model_period1.pt -input_image sample-images/dexus-office-space.jpg -output_image results/4-out.png
+
+
