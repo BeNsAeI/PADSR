@@ -30,7 +30,7 @@ class VideoConverter(object):
         fps = capture.get(cv2.CAP_PROP_FPS)
         width = 600
         height = 400
-	#if flag =='h':
+    #if flag =='h':
         #    width = 1200
         #    height = 800
         #if flag == 'l':
@@ -60,8 +60,8 @@ class VideoConverter(object):
 
             if previous_frame is not None and next_frame is not None:
                 # Create a depth map
-                depth_map = create_depth_map(previous_frame, next_frame)
-		#depth_map = cv2.resize(depth_map, (width, height), interpolation=cv2.INTER_LINEAR)
+                depth_map = create_depth_map(previous_frame, next_frame, width)
+        #depth_map = cv2.resize(depth_map, (width, height), interpolation=cv2.INTER_LINEAR)
                 # Write the result to video file
                 out.write(depth_map)
                 depthmap_count += 1
@@ -75,7 +75,7 @@ class VideoConverter(object):
         capture.release()
         cv2.destroyAllWindows()
 
-def create_depth_map(imgL, imgR):
+def create_depth_map(imgL, imgR, width):
     margin = width/2
     imgL=cv2.copyMakeBorder(imgL, top=0, bottom=0, left=margin, right=0, borderType= cv2.BORDER_CONSTANT, value=[0,0,0] )
     imgR=cv2.copyMakeBorder(imgR, top=0, bottom=0, left=margin, right=0, borderType= cv2.BORDER_CONSTANT, value=[0,0,0] )
