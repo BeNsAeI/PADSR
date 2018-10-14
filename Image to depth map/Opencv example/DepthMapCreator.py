@@ -8,15 +8,17 @@ class DepthMapCreator:
     # wsize default 3; 5; 7 for SGBM reduced size image; 15 for SGBM full size image (1300px and above); 5 Works nicely
     window_size = 3      
 
-    def __init__(self, matcher_parameters, filter_parameters):
+    def __init__(self, filter_parameters, matcher_parameters = None):
         """
         https://docs.opencv.org/trunk/d2/d85/classcv_1_1StereoSGBM.html
         """
 
-        # initate left matcher
-        self.left_matcher = cv2.StereoSGBM_create(
+        if (matcher_parameters is None):
+            self.left_matcher = cv2.StereoSGBM_create(minDisparity=0)
+        else:
+            self.left_matcher = cv2.StereoSGBM_create(
                                 minDisparity=matcher_parameters['minDisparity'],
-                                numDisparities=matcher_parameters['numDisparities'],             # max_disp has to be dividable by 16 f. E. HH 192, 256
+                                numDisparities=matcher_parameters['numDisparities'],            
                                 blockSize=matcher_parameters['blockSize'],
                                 P1=matcher_parameters['P1'],    
                                 P2=matcher_parameters['P2'],
@@ -26,7 +28,7 @@ class DepthMapCreator:
                                 speckleRange=matcher_parameters['speckleRange'],
                                 preFilterCap=matcher_parameters['preFilterCap'],
                                 mode=matcher_parameters['mode']
-        )
+            )
 
         # initiate right matcher
         self.right_matcher = cv2.ximgproc.createRightMatcher(self.left_matcher)
@@ -38,7 +40,8 @@ class DepthMapCreator:
 
 
     def get_depth_image(self, left_image, right_image):
-        print ("calling get_depth_image")
+
+        # TODO: handle the case when left_image or right_image is None
         displ = self.left_matcher.compute(left_image, right_image)  
         dispr = self.right_matcher.compute(right_image, left_image) 
 
@@ -48,5 +51,4 @@ class DepthMapCreator:
         filtered_image = self.wls_filter.filter(displ, left_image, None, dispr)  # important to put "imgL" here!!!
 
         filtered_image = cv2.normalize(src=filtered_image, dst=filtered_image, beta=0, alpha=255, norm_type=cv2.NORM_MINMAX);
-        
         return np.uint8(filtered_image)
