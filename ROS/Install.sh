@@ -2,12 +2,16 @@
 sudo sh -c 'echo "deb http://packages.ros.org/ros/ubuntu $(lsb_release -sc) main" > /etc/apt/sources.list.d/ros-latest.list'
 sudo apt-key adv --keyserver hkp://ha.pool.sks-keyservers.net:80 --recv-key 421C365BD9FF1F717815A3895523BAEEB01FA116
 sudo apt-get update
+echo "____________________________________________________________"
+echo ""
 echo "Pick the package to install:"
 echo "1. Desktop-Full Install: (Recommended, Default)"
 echo "2. Desktop Install"
 echo "3. ROS-Base: (Bare Bones)"
 echo "4. Individual Package"
 read option
+echo "____________________________________________________________"
+echo ""
 if [ $option -eq 1 ]
 then
 echo "Option selected: Desktop-Full Install"
@@ -32,11 +36,21 @@ echo "Option selected: Individual Package"
 read -p "Press enter to continue"
 echo "Listing packages:"
 apt-cache search ros-kinetic
-echo "____________________________________________________________"
 echo "Type in package name:"
 read option
 read -p "Press enter to install package $option"
 sudo apt-get install ros-kinetic-$option
 fi
 echo "____________________________________________________________"
+echo ""
+echo "initiating ros"
+sudo rosdep init
+rosdep update
+echo "Setting up the environment:"
+echo "source /opt/ros/kinetic/setup.bash" >> ~/.bashrc
+source ~/.bashrc
+echo "Setting up dependancies"
+sudo apt-get install python-rosinstall python-rosinstall-generator python-wstool build-essential
+echo "____________________________________________________________"
+echo ""
 read -p "Done! Press enter to continue"
