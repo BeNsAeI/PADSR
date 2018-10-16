@@ -8,10 +8,8 @@ class DepthMapCreator:
     # wsize default 3; 5; 7 for SGBM reduced size image; 15 for SGBM full size image (1300px and above); 5 Works nicely
     window_size = 3      
 
+
     def __init__(self, filter_parameters, matcher_parameters = None):
-        """
-        https://docs.opencv.org/trunk/d2/d85/classcv_1_1StereoSGBM.html
-        """
 
         if (matcher_parameters is None):
             self.left_matcher = cv2.StereoSGBM_create(minDisparity=0)
@@ -19,6 +17,7 @@ class DepthMapCreator:
             self.left_matcher = cv2.StereoSGBM_create(
                                 minDisparity=matcher_parameters['minDisparity'],
                                 numDisparities=matcher_parameters['numDisparities'],            
+
                                 blockSize=matcher_parameters['blockSize'],
                                 P1=matcher_parameters['P1'],    
                                 P2=matcher_parameters['P2'],
@@ -28,7 +27,9 @@ class DepthMapCreator:
                                 speckleRange=matcher_parameters['speckleRange'],
                                 preFilterCap=matcher_parameters['preFilterCap'],
                                 mode=matcher_parameters['mode']
+
             )
+
 
         # initiate right matcher
         self.right_matcher = cv2.ximgproc.createRightMatcher(self.left_matcher)
@@ -41,7 +42,6 @@ class DepthMapCreator:
 
     def get_depth_image(self, left_image, right_image):
 
-        # TODO: handle the case when left_image or right_image is None
         displ = self.left_matcher.compute(left_image, right_image)  
         dispr = self.right_matcher.compute(right_image, left_image) 
 

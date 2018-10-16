@@ -4,7 +4,7 @@ import serial
 class SerialWrapper:
 	def __init__(self, device):
 		self.ser = serial.Serial(device, 9600)
-#		print(self.ser.name)
+		print(self.ser.name)
 		self.ser.flush()
 	def sendData(self, data):
 		self.ser.flush()
