@@ -90,7 +90,7 @@ if len(results1) < len(results2):
     for i in range(len(results1)):
         xCoord.append(results1[i][0] - results2[i][0])
         # yCoord.append(results1[i][1] - results2[i][1])
-        xCoordSum = xCoordSum + xCoord[i]
+        xCoordSum = test + xCoord[i]
 else:
     for i in range(len(results2)):
         xCoord.append(results1[i][0] - results2[i][0])

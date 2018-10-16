@@ -1,41 +1,80 @@
 import cv2
-
+import argparse
 import numpy as np
 import os
+
+_DEFAULT_WIDTH = 600
+_DEFAULT_HEIGHT = 400
+
+def main():
+    args = get_arguments()
+    converter = VideoConverter()
+    converter.convert_video(args.input, args.output, args.high, args.low,
+            args.step)
+
+def get_arguments():
+    parser = argparse.ArgumentParser()
+    parser.add_argument("-i", "--input", required=True, dest='input',
+            help="Path to read the input video")
+    parser.add_argument("-o", "--output", required=True, dest='output',
+            help="Path to save the output video")
+    parser.add_argument("--high", required=False, action='store_true', dest='high',
+            help="Process high quality frames - may decrease speed")
+    parser.add_argument("--low", required=False, action='store_true', dest='low',
+            help="Process low quality frames - may increase speed")
+    parser.add_argument("-s", "--step", required=False, type=int, default=1, dest='step',
+            help="Step of reading frames, e.g. if step==3, every 3d frame will be taken for a depth map")
+    args = parser.parse_args()
+    return args
+
 
 class VideoConverter(object):
     def __init__(self):
         pass
 
-    def convert_video(self, input_file, output_file):
+    def convert_video(self, input_file, output_file, high_quality,
+            low_quality, step):
         """
         Convert input video to a depthmap video.
         Currently only MP4 format is supported.
 
         input_file: string - name of the video that will be converted to a
-        depthmap video
+            depthmap video
         output_file: string - name of the output depthmap video
+        high_quality: boolean - if true, frames dimensions will be doubled
+        low_quality: boolean - if true, frames dimensions will halved
+        step: int - step of reading frames, e.g. if step==3, every third frame
+            will be taken for creating a depth map
         """
 
-        # Check if file exists
-        if not os.path.isfile(input_file):
-            raise ValueError("File %s not found" % input_file)
+        # checking arguments
+        if step <= 0:
+            raise ValueError("Step should be greater than 0")
+        if high_quality and low_quality:
+            raise ValueError("Please choose either high or low quality, but not both")
+        if not os.access(input_file, os.R_OK):
+            raise ValueError("Please check that file %s exists." % input_file)
+        out_dir = os.path.dirname(output_file)
+        if out_dir and not os.access(out_dir, os.W_OK):
+            raise ValueError("Cannot write to directory %s. Check the permissions or choose another directory" % out_dir)
 
         capture = cv2.VideoCapture(input_file)
         if not capture or not capture.isOpened():
             raise ValueError("Failed to read file %s" % input_file)
 
+        width = _DEFAULT_WIDTH #capture.get(cv2.CAP_PROP_FRAME_WIDTH)
+        height = _DEFAULT_HEIGHT #capture.get(cv2.CAP_PROP_FRAME_HEIGHT)
+        if high_quality:
+            width *= 2
+            height *= 2
+        elif low_quality:
+            width /= 2
+            height /= 2
+
         # Set the output video parameters
         fourcc = cv2.VideoWriter_fourcc(*'DIVX')
         fps = capture.get(cv2.CAP_PROP_FPS)
-        width = 600
-        height = 400
-    #if flag =='h':
-        #    width = 1200
-        #    height = 800
-        #if flag == 'l':
-        #    width = 300
-        #    height = 200
+
         is_color = 0 # save depth map video in grayscale
         out = cv2.VideoWriter(output_file, fourcc, fps, (width, height), is_color)
 
@@ -47,27 +86,39 @@ class VideoConverter(object):
 
         while capture.isOpened():
             # Capture frame-by-frame
-            capture.read()
-            capture.read()
-            ret, next_frame = capture.read()
-            if not ret:
-                print "No frames to read, exit loop"
+            for s in range(step):
+                ret, next_frame = capture.read()
+                if not ret:
+                    print "No frames to read, exit loop"
+                    break
+            if next_frame is None:
                 break
 
+            frame_count += step
             print "Processing frame_%s" % frame_count
-            # Resize a frame to 600x400
+            # Resize a frame
             next_frame = cv2.resize(next_frame, (width, height), interpolation=cv2.INTER_LINEAR)
 
             if previous_frame is not None and next_frame is not None:
+                # Trying to figure out which direction camera moves
+                # calcOpticalFlowFarneback requires grayscale images
+                previous_frame_gr = cv2.cvtColor(previous_frame, cv2.COLOR_BGR2GRAY)
+                next_frame_gr = cv2.cvtColor(next_frame, cv2.COLOR_BGR2GRAY)
+
+                flow = cv2.calcOpticalFlowFarneback(previous_frame_gr, next_frame_gr, None, 0.5, 3, 15, 3, 5, 1.2, 0)
+                if flow[..., 0].sum() > 0:
+                    print "Camera moves to the right"
+                else:
+                    print "Camera moves to the left"
+
                 # Create a depth map
                 depth_map = create_depth_map(previous_frame, next_frame, width)
-        #depth_map = cv2.resize(depth_map, (width, height), interpolation=cv2.INTER_LINEAR)
+                #depth_map = cv2.resize(depth_map, (width, height), interpolation=cv2.INTER_LINEAR)
                 # Write the result to video file
                 out.write(depth_map)
                 depthmap_count += 1
 
             previous_frame = next_frame
-            frame_count += 3
 
         print "Finished video processing. Frames: %s, Depth maps: %s" % (frame_count, depthmap_count)
 
@@ -105,5 +156,4 @@ def create_depth_map(imgL, imgR, width):
     return disp
 
 if __name__ == "__main__":
-    converter = VideoConverter()
-    converter.convert_video("../../Video to image/example.mp4", "out.avi")
+    main()
