@@ -120,7 +120,7 @@ def test_DMC_1(imgL, imgR):
 
     filter_parameters = dict()
     filter_parameters['lmbda'] = 80000
-    filter_parameters['sigma'] = 1.2
+    filter_parameters['sigma'] = 1.20
 
     dmc = DepthMapCreator(filter_parameters, matcher_parameters)
     
