@@ -16,9 +16,6 @@ class Tester:
 		self.initTime = time.time()
 	def stopTimer(self):
 		self.endTime = time.time()
-	def resetTimer(self):
-		self.initTime = 0
-		self.endTime = 0
 	def Time(self):
 		start = self.initTime
 		end = self.endTime
@@ -26,7 +23,7 @@ class Tester:
 	def check_object_size(self,obj):
 		asizeof.asizeof(obj)
 	def print_object_profile(self,obj):
-		print (asizeof.asized(obj, detail=1).format())
+		print asizeof.asized(obj, detail=1).format()
 	def track_object(self):
 		self.obj_tr.print_diff()
 	def init_class_tracker(self,obj):

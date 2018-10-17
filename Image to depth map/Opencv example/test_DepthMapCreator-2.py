@@ -3,9 +3,7 @@ import numpy as np
 import os, glob
 from DepthMapCreator import DepthMapCreator
 from DepthMapCreator_2 import DepthMapCreator_2
-from helpers.tester import Tester
 
-tester = Tester()
 
 def init_matcher_parameters(windowSize = 0,
                             minDisparity = 0,
@@ -124,13 +122,11 @@ def test_DMC_1(imgL, imgR):
 
     dmc = DepthMapCreator(filter_parameters, matcher_parameters)
     
-    tester.resetTimer()
-    tester.startTimer()
+
     depth_image = dmc.get_depth_image(imgL, imgR)
-    tester.stopTimer()
-    executing_time = tester.Time()
+
     font = cv2.FONT_HERSHEY_SIMPLEX
-    cv2.putText(depth_image, str(executing_time),(10,10), font, 0.3,(255,255,255),1,cv2.LINE_AA)
+    #cv2.putText(depth_image, str(executing_time),(10,10), font, 0.3,(255,255,255),1,cv2.LINE_AA)
 
     cv2.imwrite("test_DMC1.jpg", depth_image)
 
@@ -149,13 +145,11 @@ def test_DMC_2(imgL, imgR):
 		                    mode = cv2.STEREO_SGBM_MODE_SGBM)
 
     dmc_2 = DepthMapCreator_2(matcher_parameters)
-    tester.resetTimer()
-    tester.startTimer()
+   
     depth_image = dmc_2.get_depth_image(imgL, imgR)
-    tester.stopTimer()
-    executing_time = tester.Time()
+
     font = cv2.FONT_HERSHEY_SIMPLEX
-    cv2.putText(depth_image, str(executing_time),(10,10), font, 0.3,(255,255,255),1,cv2.LINE_AA)
+    #cv2.putText(depth_image, str(executing_time),(10,10), font, 0.3,(255,255,255),1,cv2.LINE_AA)
     
     cv2.imwrite("test_DMC2.jpg", depth_image)
 
@@ -177,13 +171,9 @@ def test_windowSize(imgL, imgR, resultPath = 'windowSizeResult'):
         file_name = 'result' + str(windowSize) + '.jpg'
 
         dmc_2.set_window_size(windowSize)
-        tester.resetTimer()
-        tester.startTimer()
         depth_image = dmc_2.get_depth_image(imgL, imgR)
-        tester.stopTimer()
-        executing_time = tester.Time()
         font = cv2.FONT_HERSHEY_SIMPLEX
-        cv2.putText(depth_image, str(executing_time),(10,10), font, 0.3,(255,255,255),1,cv2.LINE_AA)
+        #cv2.putText(depth_image, str(executing_time),(10,10), font, 0.3,(255,255,255),1,cv2.LINE_AA)
     
         cv2.imwrite(os.path.join(resultPath, file_name), depth_image)
 
@@ -205,14 +195,11 @@ def test_numDisparities(imgL, imgR, resultPath = 'test_numDisparities'):
 
         dmc_2 = DepthMapCreator_2(matcher_paramaters)
         
-        tester.resetTimer()
-        tester.startTimer()
+
         depth_image = dmc_2.get_depth_image(imgL, imgR)
-        tester.stopTimer()
-        executing_time = tester.Time()
         
         font = cv2.FONT_HERSHEY_SIMPLEX
-        cv2.putText(depth_image, str(executing_time),(10,10), font, 0.3,(255,255,255),1,cv2.LINE_AA)
+        #cv2.putText(depth_image, str(executing_time),(10,10), font, 0.3,(255,255,255),1,cv2.LINE_AA)
 
         cv2.imwrite(os.path.join(resultPath, file_name), depth_image)
 
@@ -233,14 +220,10 @@ def test_minDisparity(imgL, imgR, resultPath = 'test_minDisparity'):
 
         dmc_2 = DepthMapCreator_2(matcher_paramaters)
         
-        tester.resetTimer()
-        tester.startTimer()
         depth_image = dmc_2.get_depth_image(imgL, imgR)
-        tester.stopTimer()
-        executing_time = tester.Time()
 
         font = cv2.FONT_HERSHEY_SIMPLEX
-        cv2.putText(depth_image, str(executing_time),(10,10), font, 0.3,(255,255,255),1,cv2.LINE_AA)
+        #cv2.putText(depth_image, str(executing_time),(10,10), font, 0.3,(255,255,255),1,cv2.LINE_AA)
 
         cv2.imwrite(os.path.join(resultPath, file_name), depth_image)
 
@@ -263,14 +246,10 @@ def test_blockSize(imgL, imgR, resultPath = 'test_blockSize'):
 
         dmc_2 = DepthMapCreator_2(matcher_paramaters)
         
-        tester.resetTimer()
-        tester.startTimer()
         depth_image = dmc_2.get_depth_image(imgL, imgR)
-        tester.stopTimer()
-        executing_time = tester.Time()
         
         font = cv2.FONT_HERSHEY_SIMPLEX
-        cv2.putText(depth_image, str(executing_time),(10,10), font, 0.3,(255,255,255),1,cv2.LINE_AA)
+        #cv2.putText(depth_image, str(executing_time),(10,10), font, 0.3,(255,255,255),1,cv2.LINE_AA)
 
         cv2.imwrite(os.path.join(resultPath, file_name), depth_image)
 
@@ -291,14 +270,10 @@ def test_preFilterCap(imgL, imgR, resultPath = 'test_preFilterCap'):
 
         dmc_2.set_preFilterCap(value)
 
-        tester.resetTimer()
-        tester.startTimer()
         depth_image = dmc_2.get_depth_image(imgL, imgR)
-        tester.stopTimer()
-        executing_time = tester.Time()
         
         font = cv2.FONT_HERSHEY_SIMPLEX
-        cv2.putText(depth_image, str(executing_time),(10,10), font, 0.3,(255,255,255),1,cv2.LINE_AA)
+        #cv2.putText(depth_image, str(executing_time),(10,10), font, 0.3,(255,255,255),1,cv2.LINE_AA)
 
         cv2.imwrite(os.path.join(resultPath, file_name), depth_image)
 
@@ -319,14 +294,10 @@ def test_UniquenessRatio(imgL, imgR, resultPath = 'test_UniquenessRatio'):
 
         dmc_2.set_uniquenessRatio(value)
 
-        tester.resetTimer()
-        tester.startTimer()
         depth_image = dmc_2.get_depth_image(imgL, imgR)
-        tester.stopTimer()
-        executing_time = tester.Time()
         
         font = cv2.FONT_HERSHEY_SIMPLEX
-        cv2.putText(depth_image, str(executing_time),(10,10), font, 0.3,(255,255,255),1,cv2.LINE_AA)
+        #cv2.putText(depth_image, str(executing_time),(10,10), font, 0.3,(255,255,255),1,cv2.LINE_AA)
 
         cv2.imwrite(os.path.join(resultPath, file_name), depth_image)
 
@@ -347,14 +318,10 @@ def test_speckleWindowSize(imgL, imgR, resultPath = 'test_speckleWindowSize'):
 
         dmc_2 = DepthMapCreator_2(matcher_paramaters)
         
-        tester.resetTimer()
-        tester.startTimer()
         depth_image = dmc_2.get_depth_image(imgL, imgR)
-        tester.stopTimer()
-        executing_time = tester.Time()
         
         font = cv2.FONT_HERSHEY_SIMPLEX
-        cv2.putText(depth_image, str(executing_time),(10,10), font, 0.3,(255,255,255),1,cv2.LINE_AA)
+        #cv2.putText(depth_image, str(executing_time),(10,10), font, 0.3,(255,255,255),1,cv2.LINE_AA)
 
         cv2.imwrite(os.path.join(resultPath, file_name), depth_image)      
 
@@ -375,14 +342,10 @@ def test_speckleRange(imgL, imgR, resultPath = 'test_speckleRange'):
 
         dmc_2 = DepthMapCreator_2(matcher_paramaters)
         
-        tester.resetTimer()
-        tester.startTimer()
         depth_image = dmc_2.get_depth_image(imgL, imgR)
-        tester.stopTimer()
-        executing_time = tester.Time()
         
         font = cv2.FONT_HERSHEY_SIMPLEX
-        cv2.putText(depth_image, str(executing_time),(10,10), font, 0.3,(255,255,255),1,cv2.LINE_AA)
+        #cv2.putText(depth_image, str(executing_time),(10,10), font, 0.3,(255,255,255),1,cv2.LINE_AA)
 
         cv2.imwrite(os.path.join(resultPath, file_name), depth_image)    
 
@@ -449,14 +412,10 @@ def test_allParameters(imgL, imgR,
                                         file_name = 'md'  + str(md) + '_nd' + str(nd) + '_bS' + str(bS) + '_sR' + str(sR) + '_sWS' + str(sWS) + '_d12MD' + str(d12MD) + '_wS' + str(wS) + '_pFC' + str(pFC) + '_uR' + str(uR) + '.jpg'
                                         print(file_name + ' is processing ...')
 
-                                        tester.resetTimer()
-                                        tester.startTimer()
                                         depth_image = dmc_2.get_depth_image(imgL, imgR)
-                                        tester.stopTimer()
-                                        executing_time = tester.Time()
                                         
                                         font = cv2.FONT_HERSHEY_SIMPLEX
-                                        cv2.putText(depth_image, str(executing_time),(10,10), font, 0.3,(255,255,255),1,cv2.LINE_AA)
+                                        #cv2.putText(depth_image, str(executing_time),(10,10), font, 0.3,(255,255,255),1,cv2.LINE_AA)
 
                                         cv2.imwrite(os.path.join(resultPath, file_name), depth_image) 
 
@@ -497,13 +456,9 @@ imgR = cv2.imread('Right4.jpg')
 imgL = cv2.resize(imgL, (0,0), fx=0.8, fy=0.8) 
 imgR = cv2.resize(imgR, (0,0), fx=0.8, fy=0.8) 
 
-tester.resetTimer()
-tester.startTimer()
 dm = create_depth_map(imgL, imgR)
-tester.stopTimer()
-executing_time = tester.Time()
 font = cv2.FONT_HERSHEY_SIMPLEX
-cv2.putText(dm, str(executing_time),(10,10), font, 0.3,(255,255,255),1,cv2.LINE_AA)
+#cv2.putText(dm, str(executing_time),(10,10), font, 0.3,(255,255,255),1,cv2.LINE_AA)
 cv2.imshow('frame-dm', dm)
 cv2.waitKey()
 
