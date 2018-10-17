@@ -107,9 +107,9 @@ class VideoConverter(object):
 
                 flow = cv2.calcOpticalFlowFarneback(previous_frame_gr, next_frame_gr, None, 0.5, 3, 15, 3, 5, 1.2, 0)
                 if flow[..., 0].sum() > 0:
-                    print "Camera moves to the right"
-                else:
                     print "Camera moves to the left"
+                else:
+                    print "Camera moves to the right"
 
                 # Create a depth map
                 depth_map = create_depth_map(previous_frame, next_frame, width)
