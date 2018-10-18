@@ -1,7 +1,10 @@
 import cv2
 import argparse
 import numpy as np
-import os
+import os, sys
+sys.path.insert(0, '../Image_Depth_Generator/')
+from Advanced import DepthMapCreator
+from Fast import DepthMapCreator_2
 
 _DEFAULT_WIDTH = 600
 _DEFAULT_HEIGHT = 400
@@ -112,8 +115,8 @@ class VideoConverter(object):
                     print "Camera moves to the left"
 
                 # Create a depth map
-                depth_map = create_depth_map(previous_frame, next_frame, width)
-                #depth_map = cv2.resize(depth_map, (width, height), interpolation=cv2.INTER_LINEAR)
+                depth_map = create_depth_map(previous_frame, next_frame)
+                
                 # Write the result to video file
                 out.write(depth_map)
                 depthmap_count += 1
@@ -126,34 +129,72 @@ class VideoConverter(object):
         capture.release()
         cv2.destroyAllWindows()
 
-def create_depth_map(imgL, imgR, width):
-    margin = width/2
-    imgL=cv2.copyMakeBorder(imgL, top=0, bottom=0, left=margin, right=0, borderType= cv2.BORDER_CONSTANT, value=[0,0,0] )
-    imgR=cv2.copyMakeBorder(imgR, top=0, bottom=0, left=margin, right=0, borderType= cv2.BORDER_CONSTANT, value=[0,0,0] )
-    # disparity range is tuned for 'aloe' image pair
-    window_size = 3
-    min_disp = 16
-    max_disp = 128
-    num_disp = max_disp-min_disp
-    stereo = cv2.StereoSGBM_create(minDisparity = min_disp,
-        numDisparities = num_disp,
-        blockSize = 8,
-        P2 = 8*3*window_size**2,
-        P1 = 32*3*window_size**2,
-        disp12MaxDiff = 1,
-        uniquenessRatio = 10,
-        speckleWindowSize = 100,
-        speckleRange = 32
-    )
-    disp = stereo.compute(imgL, imgR).astype(np.float32) / 16.0
-    disp = disp[:,margin:]
-    disp = np.uint8((disp))
-    #cv2.imshow('disparity', (disp-min_disp)/num_disp)
-    #cv2.waitKey()
-    #cv2.destroyAllWindows()
-    #exit()
-    #print(disp.shape)
-    return disp
+def create_depth_map(img_left, img_right):
+    """
+    Convert left image and right image into depth map image.
+    Need to pick a good set of matcher parameter to create
+    good quality depth map image
+
+    Input: left image and right image (either RGB fornmat or gray format)
+    
+    Output: depth map image
+    """
+    matcher_parameters = init_matcher_parameters(windowSize=5,
+                            minDisparity = 0,
+                            numDisparities = 16 * 3,
+                            blockSize = 5,
+                            disp12MaxDiff = 1,
+                            uniquenessRatio = 5,
+                            speckleWindowSize = 0,
+                            speckleRange = 2,
+                            preFilterCap=63,
+		                    mode = cv2.STEREO_SGBM_MODE_SGBM)
+
+    filter_parameters = dict()
+    filter_parameters['lmbda'] = 80000
+    filter_parameters['sigma'] = 1.20
+
+    # advance depthmap creator
+    dmc = DepthMapCreator(filter_parameters, matcher_parameters)
+
+    # fast depthmap creator
+    # dmc = DepthMapCreator_2(matcher_parameters)
+    
+    depth_image = dmc.get_depth_image(img_left, img_right)
+
+    return depth_image
+
+
+def init_matcher_parameters(windowSize = 0,
+                            minDisparity = 0,
+		                    numDisparities = 16,
+		                    blockSize = 3,
+		                    disp12MaxDiff = 0,
+		                    preFilterCap = 0,
+		                    uniquenessRatio = 0,
+		                    speckleWindowSize = 0,
+		                    speckleRange = 0,
+		                    mode = cv2.STEREO_SGBM_MODE_SGBM):
+    """
+    Initiate all parameters for SGBM matching call
+    TODO:   Should factor initiating matcher parameters to 
+            Seperate class.
+    """
+    matcher_parameters = dict()
+    matcher_parameters['minDisparity'] = minDisparity
+    matcher_parameters['numDisparities'] = numDisparities
+    matcher_parameters['blockSize'] = blockSize
+    matcher_parameters['P1'] = 8 * 3 * windowSize ** 2    
+    matcher_parameters['P2'] = 32 * 3 * windowSize ** 2
+    matcher_parameters['disp12MaxDiff'] = disp12MaxDiff
+    matcher_parameters['uniquenessRatio'] = uniquenessRatio
+    matcher_parameters['speckleWindowSize'] = speckleWindowSize
+    matcher_parameters['speckleRange'] = speckleRange
+    matcher_parameters['preFilterCap'] = preFilterCap
+    matcher_parameters['mode'] = cv2.STEREO_SGBM_MODE_SGBM
+
+    return matcher_parameters
+
 
 if __name__ == "__main__":
     main()
