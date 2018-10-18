@@ -47,7 +47,14 @@ class CreateDepthMap:
         self.wls_filter.setSigmaColor(filter_parameters['sigma'])
 
 
-    def get_depth_image(self, left_image, right_image):
+    def get_depth_image(self, left_image_src, right_image_src):
+        if(left_image_src==''):
+            raise ValueError("Please provide path to left image")
+        if(right_image_src==''):
+            raise ValueError("Please provide path to right image")    
+
+        left_image = cv2.imread(left_image_src)
+        right_image = cv2.imread(right_image_src)
         left_image = cv2.resize(left_image, self.std_img_size)
         right_image = cv2.resize(right_image, self.std_img_size)
         
@@ -61,4 +68,4 @@ class CreateDepthMap:
         return np.uint8(filtered_image)
 
 #x = CreateDepthMap()
-#plt.imshow(x.get_depth_image(cv2.imread('frame-left.jpg'), cv2.imread('frame-right.jpg')), 'gray')
+#plt.imshow(x.get_depth_image('frame-left.jpg', 'frame-right.jpg'), 'gray')
