@@ -2,7 +2,7 @@ import mock
 import pytest
 import numpy as np
 from tests.helpers.tester import Tester
-from video_to_depthmap.video_converter import VideoConverter
+from Video_To_Depthmap.video_converter import VideoConverter
 
 def mock_video_capture(mocked_cv2,total_frames_count):
     '''
@@ -17,9 +17,9 @@ def mock_video_capture(mocked_cv2,total_frames_count):
     mocked_capture.read.side_effect = [(True, np.array([i])) for i in range(total_frames_count)] + [(False, None)]
 
 
-@mock.patch('video_to_depthmap.video_converter.create_depth_map')
-@mock.patch('video_to_depthmap.video_converter.cv2')
-@mock.patch('video_to_depthmap.video_converter.os') # mock os to skip checking if files exist
+@mock.patch('Video_To_Depthmap.video_converter.create_depth_map')
+@mock.patch('Video_To_Depthmap.video_converter.cv2')
+@mock.patch('Video_To_Depthmap.video_converter.os') # mock os to skip checking if files exist
 def test_depthmaps_step_1(mocked_os, mocked_cv2, mocked_depth_map_func):
     '''
     Verify that VideoConverter doesn't skip any frames when step=1
@@ -41,12 +41,12 @@ def test_depthmaps_step_1(mocked_os, mocked_cv2, mocked_depth_map_func):
 
     test_converter = VideoConverter()
     # call convert_video with step 1 and check that it saved total_frames_count-1 depth maps
-    test_converter.convert_video("any_input", "any_output", False, False, 1)
+    test_converter.convert_video("any_input", "any_output", False, False, 1, True)
     assert mocked_writer.write.call_count == total_frames_count-1
 
-@mock.patch('video_to_depthmap.video_converter.create_depth_map')
-@mock.patch('video_to_depthmap.video_converter.cv2')
-@mock.patch('video_to_depthmap.video_converter.os') # mock os to skip checking if files exist
+@mock.patch('Video_To_Depthmap.video_converter.create_depth_map')
+@mock.patch('Video_To_Depthmap.video_converter.cv2')
+@mock.patch('Video_To_Depthmap.video_converter.os') # mock os to skip checking if files exist
 def test_depthmaps_step_3(mocked_os, mocked_cv2, mocked_depth_map_func):
     '''
     Verify that VideoConverter processes every 3d frame when step=3
@@ -68,10 +68,10 @@ def test_depthmaps_step_3(mocked_os, mocked_cv2, mocked_depth_map_func):
 
     test_converter = VideoConverter()
     # call convert_video with step 3 and check that it saved (total_frames_count/3)-1 depth maps
-    test_converter.convert_video("any_input", "any_output", False, False, 3)
+    test_converter.convert_video("any_input", "any_output", False, False, 3, True)
     assert mocked_writer.write.call_count == (total_frames_count/3)-1
 
-@mock.patch('video_to_depthmap.video_converter.os') # mock os to skip checking if files exist
+@mock.patch('Video_To_Depthmap.video_converter.os') # mock os to skip checking if files exist
 def test_depthmaps_step_0(mocked_os):
     '''
     Verify that VideoConverter raises error when step<=0
@@ -79,15 +79,15 @@ def test_depthmaps_step_0(mocked_os):
     test_converter = VideoConverter()
     # call convert_video with step 0 and check that it returns ValueError
     with pytest.raises(ValueError):
-        test_converter.convert_video("any_input", "any_output", False, False, 0)
+        test_converter.convert_video("any_input", "any_output", False, False, 0, True)
 
     # call convert_video with step -1 and check that it returns ValueError
     with pytest.raises(ValueError):
-        test_converter.convert_video("any_input", "any_output", False, False, -1)
+        test_converter.convert_video("any_input", "any_output", False, False, -1, True)
 
-@mock.patch('video_to_depthmap.video_converter.create_depth_map')
-@mock.patch('video_to_depthmap.video_converter.cv2')
-@mock.patch('video_to_depthmap.video_converter.os') # mock os to skip checking if files exist
+@mock.patch('Video_To_Depthmap.video_converter.create_depth_map')
+@mock.patch('Video_To_Depthmap.video_converter.cv2')
+@mock.patch('Video_To_Depthmap.video_converter.os') # mock os to skip checking if files exist
 def test_depthmaps_large_step(mocked_os, mocked_cv2, mocked_depth_map_func):
     '''
     Verify that VideoConverter doesn't process any frames when step > number of frames
@@ -110,12 +110,12 @@ def test_depthmaps_large_step(mocked_os, mocked_cv2, mocked_depth_map_func):
     test_converter = VideoConverter()
 
     # call convert_video with step > total_frames_count and check that it doesn't save anything
-    test_converter.convert_video("any_input", "any_output", False, False, total_frames_count+1)
+    test_converter.convert_video("any_input", "any_output", False, False, total_frames_count+1, True)
     assert mocked_writer.write.call_count == 0
 
-@mock.patch('video_to_depthmap.video_converter.create_depth_map')
-@mock.patch('video_to_depthmap.video_converter.cv2')
-@mock.patch('video_to_depthmap.video_converter.os') # mock os to skip checking if files exist
+@mock.patch('Video_To_Depthmap.video_converter.create_depth_map')
+@mock.patch('Video_To_Depthmap.video_converter.cv2')
+@mock.patch('Video_To_Depthmap.video_converter.os') # mock os to skip checking if files exist
 def test_one_frame(mocked_os, mocked_cv2, mocked_depth_map_func):
     # set required mocks
     mocked_cv2.resize.side_effect = [np.array([1])]
@@ -126,22 +126,22 @@ def test_one_frame(mocked_os, mocked_cv2, mocked_depth_map_func):
 
     # call tested method
     test_converter = VideoConverter()
-    test_converter.convert_video("any_input", "any_output", False, False, 1)
+    test_converter.convert_video("any_input", "any_output", False, False, 1, True)
 
     assert mocked_cv2.resize.call_count == 1
     assert mocked_depth_map_func.called == False
     assert mocked_writer.write.called == False
 
-@mock.patch('video_to_depthmap.video_converter.create_depth_map')
+@mock.patch('Video_To_Depthmap.video_converter.create_depth_map')
 def test_file_not_found(mocked_depth_map_func):
     '''
     Verify that function raises error if input does not exist
     '''
     test_converter = VideoConverter()
     with pytest.raises(ValueError):
-        test_converter.convert_video("any_input", "any_output", False, False, 1)
+        test_converter.convert_video("any_input", "any_output", False, False, 1, True)
 
-#@pytest.mark.skip(reason="input video should be added to run this test")
+@pytest.mark.skip(reason="input video should be added to run this test")
 def test_performance():
     tester = Tester()
     test_converter = VideoConverter()
@@ -153,7 +153,7 @@ def test_performance():
     print "__________"
     print "Timing test:"
     tester.startTimer()
-    test_converter.convert_video("../Video to image/test.mp4", "out.mp4", False, True, 1)
+    test_converter.convert_video("../Video to image/test.mp4", "out.mp4", False, True, 1, False)
     tester.stopTimer()
     print "checking object size, memory and profile:"
     tester.check_object_size(test_converter)

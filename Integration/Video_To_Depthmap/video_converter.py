@@ -2,9 +2,9 @@ import cv2
 import argparse
 import numpy as np
 import os, sys
-sys.path.insert(0, '../Image_Depth_Generator/')
-from Advanced import DepthMapCreator
-from Fast import DepthMapCreator_2
+sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
+from Image_Depth_Generator.Advanced import DepthMapCreator
+from Image_Depth_Generator.Fast import DepthMapCreator_2
 
 _DEFAULT_WIDTH = 600
 _DEFAULT_HEIGHT = 400
@@ -13,7 +13,7 @@ def main():
     args = get_arguments()
     converter = VideoConverter()
     converter.convert_video(args.input, args.output, args.high, args.low,
-            args.step)
+            args.step, args.fast)
 
 def get_arguments():
     parser = argparse.ArgumentParser()
@@ -27,6 +27,8 @@ def get_arguments():
             help="Process low quality frames - may increase speed")
     parser.add_argument("-s", "--step", required=False, type=int, default=1, dest='step',
             help="Step of reading frames, e.g. if step==3, every 3d frame will be taken for a depth map")
+    parser.add_argument("--fast", required=False, action='store_true', dest='fast',
+            help="Use fast version of depth map creator")
     args = parser.parse_args()
     return args
 
@@ -35,8 +37,7 @@ class VideoConverter(object):
     def __init__(self):
         pass
 
-    def convert_video(self, input_file, output_file, high_quality,
-            low_quality, step):
+    def convert_video(self, input_file, output_file, high_quality, low_quality, step, fast):
         """
         Convert input video to a depthmap video.
         Currently only MP4 format is supported.
@@ -111,12 +112,14 @@ class VideoConverter(object):
                 flow = cv2.calcOpticalFlowFarneback(previous_frame_gr, next_frame_gr, None, 0.5, 3, 15, 3, 5, 1.2, 0)
                 if flow[..., 0].sum() > 0:
                     print "Camera moves to the left"
+                    # swapping left and right images
+                    previous_frame, next_frame = next_frame, previous_frame
                 else:
                     print "Camera moves to the right"
 
                 # Create a depth map
-                depth_map = create_depth_map(previous_frame, next_frame)
-                
+                depth_map = create_depth_map(previous_frame, next_frame, fast)
+
                 # Write the result to video file
                 out.write(depth_map)
                 depthmap_count += 1
@@ -129,14 +132,14 @@ class VideoConverter(object):
         capture.release()
         cv2.destroyAllWindows()
 
-def create_depth_map(img_left, img_right):
+def create_depth_map(img_left, img_right, fast):
     """
     Convert left image and right image into depth map image.
     Need to pick a good set of matcher parameter to create
     good quality depth map image
 
     Input: left image and right image (either RGB fornmat or gray format)
-    
+
     Output: depth map image
     """
     matcher_parameters = init_matcher_parameters(windowSize=5,
@@ -148,18 +151,20 @@ def create_depth_map(img_left, img_right):
                             speckleWindowSize = 0,
                             speckleRange = 2,
                             preFilterCap=63,
-		                    mode = cv2.STEREO_SGBM_MODE_SGBM)
+                            mode = cv2.STEREO_SGBM_MODE_SGBM)
 
     filter_parameters = dict()
     filter_parameters['lmbda'] = 80000
     filter_parameters['sigma'] = 1.20
 
-    # advance depthmap creator
-    dmc = DepthMapCreator(filter_parameters, matcher_parameters)
+    dmc = None
+    if fast:
+        # fast depthmap creator
+        dmc = DepthMapCreator_2(matcher_parameters)
+    else:
+        # advance depthmap creator
+        dmc = DepthMapCreator(filter_parameters, matcher_parameters)
 
-    # fast depthmap creator
-    # dmc = DepthMapCreator_2(matcher_parameters)
-    
     depth_image = dmc.get_depth_image(img_left, img_right)
 
     return depth_image
@@ -167,14 +172,14 @@ def create_depth_map(img_left, img_right):
 
 def init_matcher_parameters(windowSize = 0,
                             minDisparity = 0,
-		                    numDisparities = 16,
-		                    blockSize = 3,
-		                    disp12MaxDiff = 0,
-		                    preFilterCap = 0,
-		                    uniquenessRatio = 0,
-		                    speckleWindowSize = 0,
-		                    speckleRange = 0,
-		                    mode = cv2.STEREO_SGBM_MODE_SGBM):
+                            numDisparities = 16,
+                            blockSize = 3,
+                            disp12MaxDiff = 0,
+                            preFilterCap = 0,
+                            uniquenessRatio = 0,
+                            speckleWindowSize = 0,
+                            speckleRange = 0,
+                            mode = cv2.STEREO_SGBM_MODE_SGBM):
     """
     Initiate all parameters for SGBM matching call
     TODO:   Should factor initiating matcher parameters to 

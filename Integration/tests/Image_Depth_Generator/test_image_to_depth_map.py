@@ -2,7 +2,7 @@ import mock
 import pytest
 import numpy as np
 from tests.helpers.tester import Tester
-from image_depth_generator.CreateDepthMap import CreateDepthMap
+from Image_Depth_Generator.CreateDepthMap import CreateDepthMap
 
 def test_image_path_not_given():
     '''
