@@ -141,7 +141,7 @@ def test_file_not_found(mocked_depth_map_func):
     with pytest.raises(ValueError):
         test_converter.convert_video("any_input", "any_output", False, False, 1)
 
-@pytest.mark.skip(reason="input video should be added to run this test")
+#@pytest.mark.skip(reason="input video should be added to run this test")
 def test_performance():
     tester = Tester()
     test_converter = VideoConverter()
@@ -153,7 +153,7 @@ def test_performance():
     print "__________"
     print "Timing test:"
     tester.startTimer()
-    test_converter.convert_video("../Video to image/example2.mp4", "out.mp4")
+    test_converter.convert_video("../Video to image/test.mp4", "out.mp4", False, True, 1)
     tester.stopTimer()
     print "checking object size, memory and profile:"
     tester.check_object_size(test_converter)

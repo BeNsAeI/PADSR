@@ -51,8 +51,8 @@ class CreateDepthMap:
         if(left_image_src==''):
             raise ValueError("Please provide path to left image")
         if(right_image_src==''):
-            raise ValueError("Please provide path to right image")    
-
+            raise ValueError("Please provide path to right image")
+        
         left_image = cv2.imread(left_image_src)
         right_image = cv2.imread(right_image_src)
         left_image = cv2.resize(left_image, self.std_img_size)
