@@ -1,30 +1,32 @@
 import cv2
 import numpy as np
-import os, glob
-from DepthMapCreator import DepthMapCreator
-from DepthMapCreator_2 import DepthMapCreator_2
+import os
+import sys
+sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '../..')))
+from Image_Depth_Generator.Advanced import DepthMapCreator
+from Image_Depth_Generator.Fast import DepthMapCreator_2
 
 
 def init_matcher_parameters(windowSize = 0,
                             minDisparity = 0,
-		                    numDisparities = 16,
-		                    blockSize = 3,
-		                    disp12MaxDiff = 0,
-		                    preFilterCap = 0,
-		                    uniquenessRatio = 0,
-		                    speckleWindowSize = 0,
-		                    speckleRange = 0,
-		                    mode = cv2.STEREO_SGBM_MODE_SGBM):
+                            numDisparities = 16,
+                            blockSize = 3,
+                            disp12MaxDiff = 0,
+                            preFilterCap = 0,
+                            uniquenessRatio = 0,
+                            speckleWindowSize = 0,
+                            speckleRange = 0,
+                            mode = cv2.STEREO_SGBM_MODE_SGBM):
     """
     Initiate all parameters for SGBM matching call
-    TODO:   Should factor initiating matcher parameters to 
+    TODO:   Should factor initiating matcher parameters to
             Seperate class.
     """
     matcher_parameters = dict()
     matcher_parameters['minDisparity'] = minDisparity
     matcher_parameters['numDisparities'] = numDisparities
     matcher_parameters['blockSize'] = blockSize
-    matcher_parameters['P1'] = 8 * 3 * windowSize ** 2    
+    matcher_parameters['P1'] = 8 * 3 * windowSize ** 2
     matcher_parameters['P2'] = 32 * 3 * windowSize ** 2
     matcher_parameters['disp12MaxDiff'] = disp12MaxDiff
     matcher_parameters['uniquenessRatio'] = uniquenessRatio
@@ -37,45 +39,45 @@ def init_matcher_parameters(windowSize = 0,
 
 def change_minDisparity(matcher_paramaters, dis_value):
     """
-    Minimum possible disparity value. Normally, it is zero but sometimes 
-    rectification algorithms can shift images, so this parameter needs to be adjusted accordingly. 
+    Minimum possible disparity value. Normally, it is zero but sometimes
+    rectification algorithms can shift images, so this parameter needs to be adjusted accordingly.
     """
     matcher_paramaters['minDisparity'] = dis_value
 
 def change_numDisparities(matcher_paramaters, num_dis):
     """
-    Maximum disparity minus minimum disparity. The value is always greater than zero. 
-    In the current implementation, this parameter must be divisible by 16. 
+    Maximum disparity minus minimum disparity. The value is always greater than zero.
+    In the current implementation, this parameter must be divisible by 16.
     """
     matcher_paramaters['numDisparities'] = num_dis
 
 def change_blockSize(matcher_paramaters, blockSize):
     """
-    Matched block size. It must be an odd number >=1 . 
+    Matched block size. It must be an odd number >=1 .
     Normally, it should be somewhere in the 3..11 range.
     """
     matcher_paramaters['blockSize'] = blockSize
 
 def change_speckleWindowSize(matcher_paramaters, speckleWindowSize):
     """
-    Maximum size of smooth disparity regions to consider their noise 
-    speckles and invalidate. Set it to 0 to disable speckle filtering. 
-    Otherwise, set it somewhere in the 50-200 range. 
+    Maximum size of smooth disparity regions to consider their noise
+    speckles and invalidate. Set it to 0 to disable speckle filtering.
+    Otherwise, set it somewhere in the 50-200 range.
     """
     matcher_paramaters['speckleWindowSize'] = speckleWindowSize
 
 def change_speckleRange(matcher_paramaters, speckleRange):
     """
-    Maximum disparity variation within each connected component. 
-    If you do speckle filtering, set the parameter to a positive value, 
-    it will be implicitly multiplied by 16. Normally, 1 or 2 is good enough. 
+    Maximum disparity variation within each connected component.
+    If you do speckle filtering, set the parameter to a positive value,
+    it will be implicitly multiplied by 16. Normally, 1 or 2 is good enough.
     """
     matcher_paramaters['speckleRange'] = speckleRange
 
 def change_disp12MaxDiff(matcher_paramaters, disp12MaxDiff):
     """
-    Maximum allowed difference (in integer pixel units) in 
-    the left-right disparity check. Set it to a non-positive value to disable the check. 
+    Maximum allowed difference (in integer pixel units) in
+    the left-right disparity check. Set it to a non-positive value to disable the check.
     """
     matcher_paramaters['disp12MaxDiff'] = disp12MaxDiff
 
@@ -92,13 +94,13 @@ def test_both_methods(imgL, imgR):
                             uniquenessRatio = 10,
                             speckleWindowSize = 100,
                             speckleRange = 32,
-		                    mode = cv2.STEREO_SGBM_MODE_SGBM)
-    
+                            mode = cv2.STEREO_SGBM_MODE_SGBM)
+
     # FILTER Parameters
     filter_parameters = dict()
     filter_parameters['lmbda'] = 80000
     filter_parameters['sigma'] = 1.2
-    
+
     dmc = DepthMapCreator(filter_parameters, matcher_parameters)
     dmc_2 = DepthMapCreator_2(matcher_parameters)
 
@@ -114,14 +116,14 @@ def test_DMC_1(imgL, imgR):
                             speckleWindowSize = 0,
                             speckleRange = 2,
                             preFilterCap=63,
-		                    mode = cv2.STEREO_SGBM_MODE_SGBM)
+                            mode = cv2.STEREO_SGBM_MODE_SGBM)
 
     filter_parameters = dict()
     filter_parameters['lmbda'] = 80000
     filter_parameters['sigma'] = 1.20
 
     dmc = DepthMapCreator(filter_parameters, matcher_parameters)
-    
+
 
     depth_image = dmc.get_depth_image(imgL, imgR)
 
@@ -142,15 +144,15 @@ def test_DMC_2(imgL, imgR):
                             speckleWindowSize = 0,
                             speckleRange = 2,
                             preFilterCap=63,
-		                    mode = cv2.STEREO_SGBM_MODE_SGBM)
+                            mode = cv2.STEREO_SGBM_MODE_SGBM)
 
     dmc_2 = DepthMapCreator_2(matcher_parameters)
-   
+
     depth_image = dmc_2.get_depth_image(imgL, imgR)
 
     font = cv2.FONT_HERSHEY_SIMPLEX
     #cv2.putText(depth_image, str(executing_time),(10,10), font, 0.3,(255,255,255),1,cv2.LINE_AA)
-    
+
     cv2.imwrite("test_DMC2.jpg", depth_image)
 
     return depth_image
@@ -174,7 +176,7 @@ def test_windowSize(imgL, imgR, resultPath = 'windowSizeResult'):
         depth_image = dmc_2.get_depth_image(imgL, imgR)
         font = cv2.FONT_HERSHEY_SIMPLEX
         #cv2.putText(depth_image, str(executing_time),(10,10), font, 0.3,(255,255,255),1,cv2.LINE_AA)
-    
+
         cv2.imwrite(os.path.join(resultPath, file_name), depth_image)
 
 def test_numDisparities(imgL, imgR, resultPath = 'test_numDisparities'):
@@ -183,21 +185,21 @@ def test_numDisparities(imgL, imgR, resultPath = 'test_numDisparities'):
     """
 
     matcher_paramaters = init_matcher_parameters()
-    
+
     if not os.path.exists(resultPath):
         os.makedirs(resultPath)
 
     for multiplier in range(1, 25):
         numDisparities = 16 * multiplier
         file_name = 'result' + str(numDisparities) + '.jpg'
-        
+
         change_numDisparities(matcher_paramaters, numDisparities)
 
         dmc_2 = DepthMapCreator_2(matcher_paramaters)
-        
+
 
         depth_image = dmc_2.get_depth_image(imgL, imgR)
-        
+
         font = cv2.FONT_HERSHEY_SIMPLEX
         #cv2.putText(depth_image, str(executing_time),(10,10), font, 0.3,(255,255,255),1,cv2.LINE_AA)
 
@@ -209,17 +211,17 @@ def test_minDisparity(imgL, imgR, resultPath = 'test_minDisparity'):
     """
 
     matcher_paramaters = init_matcher_parameters()
-    
+
     if not os.path.exists(resultPath):
         os.makedirs(resultPath)
 
     for minDisparity in range(50):
         file_name = 'result' + str(minDisparity) + '.jpg'
-        
+
         change_minDisparity(matcher_paramaters, minDisparity)
 
         dmc_2 = DepthMapCreator_2(matcher_paramaters)
-        
+
         depth_image = dmc_2.get_depth_image(imgL, imgR)
 
         font = cv2.FONT_HERSHEY_SIMPLEX
@@ -233,21 +235,21 @@ def test_blockSize(imgL, imgR, resultPath = 'test_blockSize'):
     """
 
     matcher_paramaters = init_matcher_parameters()
-    
+
     if not os.path.exists(resultPath):
         os.makedirs(resultPath)
 
     for blockSize in range(3, 29):
         file_name = 'result' + str(blockSize) + '.jpg'
-        
+
         print("Saving file " + file_name)
 
         change_blockSize(matcher_paramaters, blockSize)
 
         dmc_2 = DepthMapCreator_2(matcher_paramaters)
-        
+
         depth_image = dmc_2.get_depth_image(imgL, imgR)
-        
+
         font = cv2.FONT_HERSHEY_SIMPLEX
         #cv2.putText(depth_image, str(executing_time),(10,10), font, 0.3,(255,255,255),1,cv2.LINE_AA)
 
@@ -271,7 +273,7 @@ def test_preFilterCap(imgL, imgR, resultPath = 'test_preFilterCap'):
         dmc_2.set_preFilterCap(value)
 
         depth_image = dmc_2.get_depth_image(imgL, imgR)
-        
+
         font = cv2.FONT_HERSHEY_SIMPLEX
         #cv2.putText(depth_image, str(executing_time),(10,10), font, 0.3,(255,255,255),1,cv2.LINE_AA)
 
@@ -295,7 +297,7 @@ def test_UniquenessRatio(imgL, imgR, resultPath = 'test_UniquenessRatio'):
         dmc_2.set_uniquenessRatio(value)
 
         depth_image = dmc_2.get_depth_image(imgL, imgR)
-        
+
         font = cv2.FONT_HERSHEY_SIMPLEX
         #cv2.putText(depth_image, str(executing_time),(10,10), font, 0.3,(255,255,255),1,cv2.LINE_AA)
 
@@ -307,23 +309,23 @@ def test_speckleWindowSize(imgL, imgR, resultPath = 'test_speckleWindowSize'):
     """
 
     matcher_paramaters = init_matcher_parameters()
-    
+
     if not os.path.exists(resultPath):
         os.makedirs(resultPath)
 
     for value in range(50, 200):
         file_name = 'result' + str(value) + '.jpg'
-        
+
         change_speckleWindowSize(matcher_paramaters, value)
 
         dmc_2 = DepthMapCreator_2(matcher_paramaters)
-        
+
         depth_image = dmc_2.get_depth_image(imgL, imgR)
-        
+
         font = cv2.FONT_HERSHEY_SIMPLEX
         #cv2.putText(depth_image, str(executing_time),(10,10), font, 0.3,(255,255,255),1,cv2.LINE_AA)
 
-        cv2.imwrite(os.path.join(resultPath, file_name), depth_image)      
+        cv2.imwrite(os.path.join(resultPath, file_name), depth_image)
 
 def test_speckleRange(imgL, imgR, resultPath = 'test_speckleRange'):
     """
@@ -331,25 +333,25 @@ def test_speckleRange(imgL, imgR, resultPath = 'test_speckleRange'):
     """
 
     matcher_paramaters = init_matcher_parameters()
-    
+
     if not os.path.exists(resultPath):
         os.makedirs(resultPath)
 
     for value in range(1, 20):
         file_name = 'result' + str(value) + '.jpg'
-        
+
         change_speckleRange(matcher_paramaters, value)
 
         dmc_2 = DepthMapCreator_2(matcher_paramaters)
-        
+
         depth_image = dmc_2.get_depth_image(imgL, imgR)
-        
+
         font = cv2.FONT_HERSHEY_SIMPLEX
         #cv2.putText(depth_image, str(executing_time),(10,10), font, 0.3,(255,255,255),1,cv2.LINE_AA)
 
-        cv2.imwrite(os.path.join(resultPath, file_name), depth_image)    
+        cv2.imwrite(os.path.join(resultPath, file_name), depth_image)
 
-def test_allParameters(imgL, imgR, 
+def test_allParameters(imgL, imgR,
                         minDisp_list = [0, 16],
                         numDisp_multiplier_list = [6, 7, 8],
                         blockSize_list = [3, 7, 11],
@@ -362,20 +364,20 @@ def test_allParameters(imgL, imgR,
                         resultPath = 'test_allParameters_1'):
     """
     Parameters to tests:
-        minDisparity(md):           
-        numDisparity(nd):           
-        blockSize(bs):              
-        speckleRange(sR) :         
-        speckleWindowSize(sWS):     
+        minDisparity(md):
+        numDisparity(nd):
+        blockSize(bs):
+        speckleRange(sR) :
+        speckleWindowSize(sWS):
         disp12MaxDiff(d12MD)
-        windowSize(wS):             
-        preFilterCap(pFC):          
-        uniquenessRatio(uR):        
+        windowSize(wS):
+        preFilterCap(pFC):
+        uniquenessRatio(uR):
     """
 
     print('Test all parameters')
     matcher_paramaters = init_matcher_parameters()
-    
+
     if not os.path.exists(resultPath):
         os.makedirs(resultPath)
 
@@ -413,14 +415,14 @@ def test_allParameters(imgL, imgR,
                                         print(file_name + ' is processing ...')
 
                                         depth_image = dmc_2.get_depth_image(imgL, imgR)
-                                        
+
                                         font = cv2.FONT_HERSHEY_SIMPLEX
                                         #cv2.putText(depth_image, str(executing_time),(10,10), font, 0.3,(255,255,255),1,cv2.LINE_AA)
 
-                                        cv2.imwrite(os.path.join(resultPath, file_name), depth_image) 
+                                        cv2.imwrite(os.path.join(resultPath, file_name), depth_image)
 
 def create_depth_map(imgL, imgR):
-    
+
     margin = int(imgL.shape[1] / 2)
     imgL=cv2.copyMakeBorder(imgL, top=0, bottom=0, left=margin, right=0, borderType= cv2.BORDER_CONSTANT, value=[0,0,0] )
     imgR=cv2.copyMakeBorder(imgR, top=0, bottom=0, left=margin, right=0, borderType= cv2.BORDER_CONSTANT, value=[0,0,0] )
@@ -447,14 +449,14 @@ def create_depth_map(imgL, imgR):
 
 
 
-    
+
 
 
 imgL = cv2.imread('Left4.jpg')
 imgR = cv2.imread('Right4.jpg')
 
-imgL = cv2.resize(imgL, (0,0), fx=0.8, fy=0.8) 
-imgR = cv2.resize(imgR, (0,0), fx=0.8, fy=0.8) 
+imgL = cv2.resize(imgL, (0,0), fx=0.8, fy=0.8)
+imgR = cv2.resize(imgR, (0,0), fx=0.8, fy=0.8)
 
 dm = create_depth_map(imgL, imgR)
 font = cv2.FONT_HERSHEY_SIMPLEX

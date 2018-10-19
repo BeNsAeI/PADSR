@@ -16,6 +16,7 @@ class DepthMapCreator_2(object):
         if (matcher_parameters is None):
             self.stereo = cv2.StereoSGBM_create(minDisparity=0)
             self.min_disp = 0
+            self.num_disp = 1
         else:
             self.stereo = cv2.StereoSGBM_create(
                                 minDisparity=matcher_parameters['minDisparity'],
@@ -31,12 +32,17 @@ class DepthMapCreator_2(object):
                                 mode=matcher_parameters['mode']
             )
 
-        self.min_disp = matcher_parameters['minDisparity']
-        self.num_disp = matcher_parameters['numDisparities']
+            self.min_disp = matcher_parameters['minDisparity']
+            self.num_disp = matcher_parameters['numDisparities']
 
 
     def get_depth_image(self, left_image, right_image):
-        
+
+        if left_image is None:
+            raise ValueError("left_image is None")
+        if right_image is None:
+            raise ValueError("right_image is None")
+
         stereo_image = self.stereo.compute(left_image, right_image).astype(np.float32)/16.0
         stereo_image = (stereo_image - self.min_disp) / self.num_disp
         filtered_image = cv2.normalize(src=stereo_image, dst=stereo_image, beta=0, alpha=255, norm_type=cv2.NORM_MINMAX)

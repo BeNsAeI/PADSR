@@ -1,3 +1,4 @@
+import os
 import numpy as np
 from sklearn.preprocessing import normalize
 import cv2
@@ -10,6 +11,8 @@ class DepthMapCreator:
 
 
     def __init__(self, filter_parameters, matcher_parameters = None):
+        if filter_parameters is None:
+            raise ValueError("filter_parameters is None")
 
         if (matcher_parameters is None):
             self.left_matcher = cv2.StereoSGBM_create(minDisparity=0)
@@ -33,7 +36,7 @@ class DepthMapCreator:
 
         # initiate right matcher
         self.right_matcher = cv2.ximgproc.createRightMatcher(self.left_matcher)
-        
+
         # initiate filter
         self.wls_filter = cv2.ximgproc.createDisparityWLSFilter(matcher_left=self.left_matcher)
         self.wls_filter.setLambda(filter_parameters['lmbda'])
@@ -42,8 +45,13 @@ class DepthMapCreator:
 
     def get_depth_image(self, left_image, right_image):
 
-        displ = self.left_matcher.compute(left_image, right_image)  
-        dispr = self.right_matcher.compute(right_image, left_image) 
+        if left_image is None:
+            raise ValueError("left_image is None")
+        if right_image is None:
+            raise ValueError("right_image is None")
+
+        displ = self.left_matcher.compute(left_image, right_image)
+        dispr = self.right_matcher.compute(right_image, left_image)
 
         displ = np.int16(displ)
         dispr = np.int16(dispr)

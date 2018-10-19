@@ -1,3 +1,4 @@
+import os
 import numpy as np
 from sklearn.preprocessing import normalize
 import cv2
@@ -18,19 +19,19 @@ class CreateDepthMap:
         'preFilterCap' : 63,
         'mode' : cv2.STEREO_SGBM_MODE_SGBM_3WAY
     }
-    
+
     default_filter_params = {
         'lmbda' : 8000,
         'sigma' : 1.2,
-        'visual_multiplier' : 1.0  
+        'visual_multiplier' : 1.0
     }
 
     def __init__(self, matcher_parameters=default_matcher_params, filter_parameters=default_filter_params):
         self.left_matcher = cv2.StereoSGBM_create(
                                 minDisparity=matcher_parameters['minDisparity'],
-                                numDisparities=matcher_parameters['numDisparities'],             
+                                numDisparities=matcher_parameters['numDisparities'],
                                 blockSize=matcher_parameters['blockSize'],
-                                P1=matcher_parameters['P1'],    
+                                P1=matcher_parameters['P1'],
                                 P2=matcher_parameters['P2'],
                                 disp12MaxDiff=matcher_parameters['disp12MaxDiff'],
                                 uniquenessRatio=matcher_parameters['uniquenessRatio'],
@@ -41,25 +42,25 @@ class CreateDepthMap:
         )
 
         self.right_matcher = cv2.ximgproc.createRightMatcher(self.left_matcher)
-        
+
         self.wls_filter = cv2.ximgproc.createDisparityWLSFilter(matcher_left=self.left_matcher)
         self.wls_filter.setLambda(filter_parameters['lmbda'])
         self.wls_filter.setSigmaColor(filter_parameters['sigma'])
 
 
     def get_depth_image(self, left_image_src, right_image_src):
-        if(left_image_src==''):
-            raise ValueError("Please provide path to left image")
-        if(right_image_src==''):
-            raise ValueError("Please provide path to right image")
-        
+        if not os.access(left_image_src, os.R_OK):
+            raise ValueError("Please check that file %s exists." % left_image_src)
+        if not os.access(right_image_src, os.R_OK):
+            raise ValueError("Please check that file %s exists." % right_image_src)
+
         left_image = cv2.imread(left_image_src)
         right_image = cv2.imread(right_image_src)
         left_image = cv2.resize(left_image, self.std_img_size)
         right_image = cv2.resize(right_image, self.std_img_size)
-        
-        displ = self.left_matcher.compute(left_image, right_image)  
-        dispr = self.right_matcher.compute(right_image, left_image) 
+
+        displ = self.left_matcher.compute(left_image, right_image)
+        dispr = self.right_matcher.compute(right_image, left_image)
         displ = np.int16(displ)
         dispr = np.int16(dispr)
 
