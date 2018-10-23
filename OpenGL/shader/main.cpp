@@ -819,7 +819,7 @@ InitGraphics( )
 	// Setup shaders
 
 	Pattern = new GLSLProgram( );
-	bool valid = Pattern->Create( (char *)"lighting2.vert",  (char *)"lighting2.frag" );
+	bool valid = Pattern->Create( (char *)"Video.vert",  (char *)"Video.frag" );
 	if( ! valid )
 	{
 		fprintf( stderr, "Shader cannot be created!\n" );
