@@ -1,4 +1,6 @@
 import os
+import sys
+sys.path.append(os.path.join(os.path.dirname(__file__), '..'))
 from Integration.helpers.cli_helpers import * # BAD PRACTICE
 from Integration.Video_To_Depthmap.video_converter import VideoConverter
 
@@ -14,7 +16,7 @@ def main():
         input_video = get_input_video_name()#**prompt_settings)
         print_formatted_text("Video to process: %s" % input_video)
 
-        output_video = get_input_video_name()#**prompt_settings)
+        output_video = get_output_video_name()#**prompt_settings)
         print_formatted_text("Output will be saved: %s" % output_video)
 
         low = get_low_quality_option()

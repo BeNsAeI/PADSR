@@ -1,8 +1,12 @@
 import cv2
 import argparse
 import numpy as np
-import sys, os
-sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
+
+# ugly temporary solution to make this file executable (for manual testing)
+if __name__ == "__main__":
+    import sys, os
+    sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '../..')))
+
 from Integration.helpers.file_system_helpers import check_file_exists, check_dir_write_access
 from Integration.Image_Depth_Generator.Advanced import DepthMapCreator
 from Integration.Image_Depth_Generator.Fast import DepthMapCreator_2
@@ -48,6 +52,8 @@ class VideoConverter(object):
         # checking arguments
         if step <= 0:
             raise ValueError("Step should be greater than 0")
+        if input_file == output_file:
+            raise ValueError("Input and output file cannot have the same names")
         if not check_file_exists(input_file):
             raise ValueError("Please check that file %s exists." % input_file)
         if not check_dir_write_access(output_file):
@@ -58,8 +64,8 @@ class VideoConverter(object):
         if not capture or not capture.isOpened():
             raise ValueError("Failed to read file %s" % input_file)
 
-        width = capture.get(cv2.CAP_PROP_FRAME_WIDTH)
-        height = capture.get(cv2.CAP_PROP_FRAME_HEIGHT)
+        width = int(capture.get(cv2.CAP_PROP_FRAME_WIDTH))
+        height = int(capture.get(cv2.CAP_PROP_FRAME_HEIGHT))
 
         if low_quality:
             width /= 2
@@ -173,14 +179,14 @@ def init_matcher_parameters(windowSize = 0,
                             mode = cv2.STEREO_SGBM_MODE_SGBM):
     """
     Initiate all parameters for SGBM matching call
-    TODO:   Should factor initiating matcher parameters to 
+    TODO:   Should factor initiating matcher parameters to
             Seperate class.
     """
     matcher_parameters = dict()
     matcher_parameters['minDisparity'] = minDisparity
     matcher_parameters['numDisparities'] = numDisparities
     matcher_parameters['blockSize'] = blockSize
-    matcher_parameters['P1'] = 8 * 3 * windowSize ** 2    
+    matcher_parameters['P1'] = 8 * 3 * windowSize ** 2
     matcher_parameters['P2'] = 32 * 3 * windowSize ** 2
     matcher_parameters['disp12MaxDiff'] = disp12MaxDiff
     matcher_parameters['uniquenessRatio'] = uniquenessRatio

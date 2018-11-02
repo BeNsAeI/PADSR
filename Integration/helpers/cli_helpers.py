@@ -76,6 +76,15 @@ def get_step_value():
     step = None
     while not step:
         step = _get_user_input("Step of reading frames (e.g. if step==3, every 3d frame will be taken for a depth map): ")
+        try:
+            step = int(step)
+        except:
+            print_formatted_text("Please enter an integer value")
+            step = None
+            continue
+        if step <= 0:
+            print_formatted_text("Step should be greater than 0")
+            step = None
     return step
 
 def get_fast_depthmap_option():
