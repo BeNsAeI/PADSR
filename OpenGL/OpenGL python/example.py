@@ -83,7 +83,9 @@ def display():
 	glPushMatrix()
 	glRotate(Orientx,1,0,0)
 	glRotate(Orienty,0,1,0)
+	# Call the shader begin right before here
 	glCallList(BoxList);
+	# end to call to shader
 	glPopMatrix()
 	glutSwapBuffers()
 	glutPostRedisplay();
