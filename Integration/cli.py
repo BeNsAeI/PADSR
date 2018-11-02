@@ -17,9 +17,7 @@ def main():
         output_video = get_input_video_name()#**prompt_settings)
         print_formatted_text("Output will be saved: %s" % output_video)
 
-        high, low = get_quality_option()
-        if high:
-            print_formatted_text("High quality enabled")
+        low = get_low_quality_option()
         if low:
             print_formatted_text("Low quality enabled")
 
@@ -31,7 +29,7 @@ def main():
             print_formatted_text("Fast depth map enabled")
 
         try:
-            converter.convert_video(input_video, output_video, high, low, step, fast)
+            converter.convert_video(input_video, output_video, low, step, fast)
         except ValueError as err:
             print "===============> Error: ", err
 

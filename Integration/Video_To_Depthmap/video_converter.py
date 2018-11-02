@@ -1,18 +1,16 @@
 import cv2
 import argparse
 import numpy as np
-import os, sys
+import sys, os
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
-from Image_Depth_Generator.Advanced import DepthMapCreator
-from Image_Depth_Generator.Fast import DepthMapCreator_2
-
-_DEFAULT_WIDTH = 600
-_DEFAULT_HEIGHT = 400
+from Integration.helpers.file_system_helpers import check_file_exists, check_dir_write_access
+from Integration.Image_Depth_Generator.Advanced import DepthMapCreator
+from Integration.Image_Depth_Generator.Fast import DepthMapCreator_2
 
 def main():
     args = get_arguments()
     converter = VideoConverter()
-    converter.convert_video(args.input, args.output, args.high, args.low,
+    converter.convert_video(args.input, args.output, args.low,
             args.step, args.fast)
 
 def get_arguments():
@@ -21,10 +19,8 @@ def get_arguments():
             help="Path to read the input video")
     parser.add_argument("-o", "--output", required=True, dest='output',
             help="Path to save the output video")
-    parser.add_argument("--high", required=False, action='store_true', dest='high',
-            help="Process high quality frames - may decrease speed")
     parser.add_argument("--low", required=False, action='store_true', dest='low',
-            help="Process low quality frames - may increase speed")
+            help="Resize frames to decrease halve the original aspect ratio - may increase speed")
     parser.add_argument("-s", "--step", required=False, type=int, default=1, dest='step',
             help="Step of reading frames, e.g. if step==3, every 3d frame will be taken for a depth map")
     parser.add_argument("--fast", required=False, action='store_true', dest='fast',
@@ -37,15 +33,13 @@ class VideoConverter(object):
     def __init__(self):
         pass
 
-    def convert_video(self, input_file, output_file, high_quality, low_quality, step, fast):
+    def convert_video(self, input_file, output_file, low_quality, step, fast):
         """
         Convert input video to a depthmap video.
         Currently only MP4 format is supported.
 
-        input_file: string - name of the video that will be converted to a
-            depthmap video
+        input_file: string - name of the video that will be converted to a depthmap video
         output_file: string - name of the output depthmap video
-        high_quality: boolean - if true, frames dimensions will be doubled
         low_quality: boolean - if true, frames dimensions will halved
         step: int - step of reading frames, e.g. if step==3, every third frame
             will be taken for creating a depth map
@@ -54,24 +48,20 @@ class VideoConverter(object):
         # checking arguments
         if step <= 0:
             raise ValueError("Step should be greater than 0")
-        if high_quality and low_quality:
-            raise ValueError("Please choose either high or low quality, but not both")
-        if not os.access(input_file, os.R_OK):
+        if not check_file_exists(input_file):
             raise ValueError("Please check that file %s exists." % input_file)
-        out_dir = os.path.dirname(output_file)
-        if out_dir and not os.access(out_dir, os.W_OK):
-            raise ValueError("Cannot write to directory %s. Check the permissions or choose another directory" % out_dir)
+        if not check_dir_write_access(output_file):
+            raise ValueError("Cannot write to directory to save %s file. Check permissions or choose another path",
+                    output_file)
 
         capture = cv2.VideoCapture(input_file)
         if not capture or not capture.isOpened():
             raise ValueError("Failed to read file %s" % input_file)
 
-        width = _DEFAULT_WIDTH #capture.get(cv2.CAP_PROP_FRAME_WIDTH)
-        height = _DEFAULT_HEIGHT #capture.get(cv2.CAP_PROP_FRAME_HEIGHT)
-        if high_quality:
-            width *= 2
-            height *= 2
-        elif low_quality:
+        width = capture.get(cv2.CAP_PROP_FRAME_WIDTH)
+        height = capture.get(cv2.CAP_PROP_FRAME_HEIGHT)
+
+        if low_quality:
             width /= 2
             height /= 2
 
@@ -100,8 +90,9 @@ class VideoConverter(object):
 
             frame_count += step
             print "Processing frame_%s" % frame_count
-            # Resize a frame
-            next_frame = cv2.resize(next_frame, (width, height), interpolation=cv2.INTER_LINEAR)
+            if low_quality:
+                # Resize a frame
+                next_frame = cv2.resize(next_frame, (width, height), interpolation=cv2.INTER_LINEAR)
 
             if previous_frame is not None and next_frame is not None:
                 # Trying to figure out which direction camera moves

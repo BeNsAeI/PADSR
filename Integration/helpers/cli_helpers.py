@@ -1,11 +1,11 @@
 from __future__ import unicode_literals
 
-import os
 from prompt_toolkit import prompt
 from prompt_toolkit.history import FileHistory
 from prompt_toolkit.shortcuts import confirm
 from prompt_toolkit.auto_suggest import AutoSuggestFromHistory
 from prompt_toolkit import print_formatted_text
+from Integration.helpers.file_system_helpers import check_file_exists, check_dir_write_access
 
 def _get_user_confirmation(question, default=False):
     '''
@@ -27,30 +27,6 @@ def _get_user_input(text):
         return input_
     return None
 
-def _check_dir_write_access(filename):
-    '''
-    Check if a directory where a file is located is accessible for writing,
-
-    filename: string - the name of file to check. Can be a relative/absolute path
-    return: True if dir is available for writing, False otherwise
-    '''
-    if not filename:
-        return False
-    out_dir = os.path.dirname(filename) or '.'
-    return os.access(out_dir, os.W_OK)
-
-def _check_file_exists(filename):
-    '''
-    Check if file is accessible for reading.
-
-    filename: string - the name of file to check. Can be a relative/absolute path
-    return: True if file exists and available for reading, False otherwise
-    '''
-    if not filename:
-        return False
-    return os.access(filename, os.R_OK)
-
-
 def get_input_video_name():
     '''
     TODO
@@ -60,7 +36,7 @@ def get_input_video_name():
         input_video = _get_user_input("Path to input video: ")
         if not input_video:
             continue
-        if not _check_file_exists(input_video):
+        if not check_file_exists(input_video):
             print_formatted_text("File %s doesn't exist or not available for reading. Please try again." % input_video)
             input_video = None
     # TODO check file is a video
@@ -75,28 +51,23 @@ def get_output_video_name():
         output_video = _get_user_input("Path to save the output_video video: ")
         if not output_video:
             continue
-        if not _check_dir_write_access(output_video):
+        if not check_dir_write_access(output_video):
             print_formatted_text("Cannot write to directory. Please try again.")
             output_video = None
             continue
 
-        if _check_file_exists(output_video):
+        if check_file_exists(output_video):
             rewrite = _get_user_confirmation("File %s already exists. Do you want to rewrite it?" % output_video)
             if not rewrite:
                 output_video = None
     return output_video
 
-def get_quality_option():
+def get_low_quality_option():
     '''
     TODO
     '''
-    high = False
-    low = False
-    high = _get_user_confirmation("Process high quality frames? (may decrease speed)")
-    quality = _get_user_input("Available aspect ratio: ")
-    if not high:
-        low = _get_user_confirmation("Process low quality frames? (may increase speed)")
-    return (high, low)
+    low = _get_user_confirmation("Do you want to halve the frames aspect ratio? (may increase speed)")
+    return low
 
 def get_step_value():
     '''

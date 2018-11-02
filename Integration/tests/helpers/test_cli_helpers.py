@@ -5,7 +5,7 @@ from Integration.helpers import cli_helpers
 _EXPECTED_VIDEO_NAME = "video.mp4"
 
 @mock.patch('Integration.helpers.cli_helpers._get_user_input')
-@mock.patch('Integration.helpers.cli_helpers._check_file_exists')
+@mock.patch('Integration.helpers.cli_helpers.check_file_exists')
 def test_input_happy_path(mocked_file_check, mocked_user_input):
     '''
     Test get_input_video_name happy path
@@ -18,7 +18,7 @@ def test_input_happy_path(mocked_file_check, mocked_user_input):
     assert user_input == _EXPECTED_VIDEO_NAME
 
 @mock.patch('Integration.helpers.cli_helpers._get_user_input')
-@mock.patch('Integration.helpers.cli_helpers._check_file_exists')
+@mock.patch('Integration.helpers.cli_helpers.check_file_exists')
 def test_input_empty(mocked_file_check, mocked_user_input):
     '''
     Verify that get_input_video_name does not fail if empty answer is passed
@@ -33,7 +33,7 @@ def test_input_empty(mocked_file_check, mocked_user_input):
 
 @mock.patch('Integration.helpers.cli_helpers.print_formatted_text')
 @mock.patch('Integration.helpers.cli_helpers._get_user_input')
-@mock.patch('Integration.helpers.cli_helpers._check_file_exists')
+@mock.patch('Integration.helpers.cli_helpers.check_file_exists')
 def test_input_not_exist(mocked_file_check, mocked_user_input, mocked_warning):
     '''
     Verify that get_input_video_name does not fail if a video does not exist
@@ -48,8 +48,8 @@ def test_input_not_exist(mocked_file_check, mocked_user_input, mocked_warning):
     assert mocked_warning.call_count == 1
 
 @mock.patch('Integration.helpers.cli_helpers._get_user_input')
-@mock.patch('Integration.helpers.cli_helpers._check_file_exists')
-@mock.patch('Integration.helpers.cli_helpers._check_dir_write_access')
+@mock.patch('Integration.helpers.cli_helpers.check_file_exists')
+@mock.patch('Integration.helpers.cli_helpers.check_dir_write_access')
 def test_output_happy_path(mocked_dir_check, mocked_file_check, mocked_user_input):
     '''
     Test get_output_video_name happy path
@@ -63,8 +63,8 @@ def test_output_happy_path(mocked_dir_check, mocked_file_check, mocked_user_inpu
     assert output_video_name == _EXPECTED_VIDEO_NAME
 
 @mock.patch('Integration.helpers.cli_helpers._get_user_input')
-@mock.patch('Integration.helpers.cli_helpers._check_file_exists')
-@mock.patch('Integration.helpers.cli_helpers._check_dir_write_access')
+@mock.patch('Integration.helpers.cli_helpers.check_file_exists')
+@mock.patch('Integration.helpers.cli_helpers.check_dir_write_access')
 def test_output_empty(mocked_dir_check, mocked_file_check, mocked_user_input):
     '''
     Verify that get_output_video_name does not fail if empty answer is passed
@@ -80,8 +80,8 @@ def test_output_empty(mocked_dir_check, mocked_file_check, mocked_user_input):
 
 @mock.patch('Integration.helpers.cli_helpers.print_formatted_text')
 @mock.patch('Integration.helpers.cli_helpers._get_user_input')
-@mock.patch('Integration.helpers.cli_helpers._check_file_exists')
-@mock.patch('Integration.helpers.cli_helpers._check_dir_write_access')
+@mock.patch('Integration.helpers.cli_helpers.check_file_exists')
+@mock.patch('Integration.helpers.cli_helpers.check_dir_write_access')
 def test_output_directory_not_exist(mocked_dir_check, mocked_file_check, mocked_user_input, mocked_warning):
     '''
     Verify that get_output_video_name does not fail if a name of output video
@@ -100,7 +100,7 @@ def test_output_directory_not_exist(mocked_dir_check, mocked_file_check, mocked_
 
 @mock.patch('Integration.helpers.cli_helpers._get_user_confirmation')
 @mock.patch('Integration.helpers.cli_helpers._get_user_input')
-@mock.patch('Integration.helpers.cli_helpers._check_file_exists')
+@mock.patch('Integration.helpers.cli_helpers.check_file_exists')
 def test_output_already_exists(mocked_file_check, mocked_user_input, mocked_confirm):
     '''
     Verify that get_output_video_name does not fail if an output video already exists
@@ -117,27 +117,15 @@ def test_output_already_exists(mocked_file_check, mocked_user_input, mocked_conf
     assert mocked_confirm.call_count == 2
 
 @mock.patch('Integration.helpers.cli_helpers._get_user_confirmation')
-def test_high_quality_empty(mocked_confirm):
+def test_low_quality_empty(mocked_confirm):
     '''
-    Verify that get_quality_option does not fail if no answer is provided to
-    the high quality confirmation question and asks 
-    '''
-    pass
-def test_high_quality_wrong_answer():
-    '''
-    Verify that get_quality_option does not fail if a user's answer on
-    the high quality confirmation question was neither 'y' nor 'n'
-    '''
-    pass
-def test_low_quality_empty():
-    '''
-    Verify that get_quality_option does not fail if no answer is provided to
+    Verify that get_low_quality_option does not fail if no answer is provided to
     the low quality confirmation question
     '''
     pass
 def test_low_quality_wrong_answer():
     '''
-    Verify that get_quality_option does not fail if a user's answer on
+    Verify that get_low_quality_option does not fail if a user's answer on
     the low quality confirmation question was neither 'y' nor 'n'
     '''
     pass
