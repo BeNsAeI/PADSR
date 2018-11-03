@@ -1,9 +1,7 @@
 from __future__ import unicode_literals
 
 from prompt_toolkit import prompt
-from prompt_toolkit.history import FileHistory
 from prompt_toolkit.shortcuts import confirm
-from prompt_toolkit.auto_suggest import AutoSuggestFromHistory
 from prompt_toolkit import print_formatted_text
 from Integration.helpers.file_system_helpers import check_file_exists, check_dir_write_access
 
