@@ -879,7 +879,9 @@ void InitLists( )
 	BoxList = glGenLists( 1 );
 	glNewList( BoxList, GL_COMPILE );
 	// Random Objects placed here (polyStack)
-	MjbSphere(5,64,64);
+	//MjbSphere(5,64,64);
+	glutWireTeapot(5);
+	glutSolidTeapot(5);
 	glEndList( );
 
 

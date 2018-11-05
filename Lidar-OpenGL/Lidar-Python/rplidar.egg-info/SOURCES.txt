@@ -1,0 +1,8 @@
+rplidar.py
+setup.py
+rplidar.egg-info/PKG-INFO
+rplidar.egg-info/SOURCES.txt
+rplidar.egg-info/dependency_links.txt
+rplidar.egg-info/requires.txt
+rplidar.egg-info/top_level.txt
+rplidar.egg-info/zip-safe
