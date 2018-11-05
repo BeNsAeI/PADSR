@@ -38,20 +38,20 @@ def keyboard(key, x, y):
 	global multiplier;
 	#print("keyboard called with "+ key + ".")
 	if key == 'w' and Orientx < 90:
-		Orientx += 5
+		Orientx += 1
 	if key == 's' and Orientx > -90:
-		Orientx -= 5
+		Orientx -= 1
 	if key == 'a' and Orienty > -90:
-		Orienty -= 5
+		Orienty -= 1
 	if key == 'd' and Orienty < 90:
-		Orienty += 5
+		Orienty += 1
 	if key == 'h':
 		Orientx = 0
 		Orienty = 0
 	if key == '=' and multiplier < 20:
-		multiplier += 1
+		multiplier += 0.25
 	if key == "-" and multiplier > -20:
-		multiplier -= 1
+		multiplier -= 0.25
 	#print ("(" + str(Orientx) + ", " + str(Orienty) + ")")
 
 def main():
@@ -85,7 +85,9 @@ def main():
 		vec3 vert = gl_Vertex.xyz;
 		vert.z = texture2D(depth, vST).r * uMultiplier;
 		vec4 ECposition = gl_ModelViewMatrix * gl_Vertex;
-		vN = normalize( gl_NormalMatrix * gl_Normal ); // normal vector
+		vec3 aLocalNormal = gl_Normal;
+		vN = normalize( gl_NormalMatrix * aLocalNormal ); // normal vector
+		vN.z = vN.z + vert.z;
 		vL = LIGHTPOSITION - ECposition.xyz; // vector from the point
 		// to the light position
 		vE = vec3( 0., 0., 0. ) - ECposition.xyz; // vector from the point
