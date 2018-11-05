@@ -102,8 +102,8 @@ def updateGPUGraph():
     global gpuAx
 
     fileData = 0
-    #with open(gpuLoadFile, 'r') as gpuFile:
-    #    fileData = gpuFile.read()
+    with open(gpuLoadFile, 'r') as gpuFile:
+        fileData = gpuFile.read()
     
     fill_lines_gpu = update_plot(gpuAx, gpuy_list, int(fileData)/10, gpux_list, gpuLine, fill_lines_gpu)
 
