@@ -256,6 +256,9 @@ def display():
     global rgb
     global depth
 
+    #rgbData = funccall()
+    #depthData = funccall()
+
     glEnable(GL_TEXTURE_2D)
     glActiveTexture(GL_TEXTURE0)
     RGBTexture = glGenTextures(1)
