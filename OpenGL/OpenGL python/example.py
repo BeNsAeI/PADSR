@@ -21,6 +21,14 @@ Orienty = 0.0
 multiplier = 0.0
 uMultiplier = None
 BoxList = None
+RGB = "rgb.jpg"
+Depth = "depth.jpg"
+rgb = None
+depth = None
+rgbData = None
+depthData = None
+uRGB = None
+uDepth = None
 
 print("Python OpenGL version: " + str(OpenGL.__version__))
 
@@ -141,6 +149,8 @@ def main():
     except OpenGL.error.GLError:
         print glGetProgramInfoLog(program)
         raise
+    global uRGB
+    global uDepth
     uDepth = glGetUniformLocation(program, "depth")
     uRGB = glGetUniformLocation(program, "RGB")
     global uMultiplier
@@ -165,6 +175,13 @@ def main():
     glUniform1f(uShininess, 1)
 
     # set background texture
+    global RGB
+    global Depth
+    global rgb
+    global depth
+    global rgbData
+    global depthData
+
     RGB = "rgb.jpg"
     Depth = "depth.jpg"
     rgb = Image.open(RGB)
@@ -172,25 +189,7 @@ def main():
     depth = Image.open(Depth)
     depthData = numpy.array(list(depth.getdata()), numpy.uint8)
 
-    glEnable(GL_TEXTURE_2D)
-    glActiveTexture(GL_TEXTURE0)
-    RGBTexture = glGenTextures(1)
-    glBindTexture(GL_TEXTURE_2D, RGBTexture)
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR)
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR)
-    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB,
-                 rgb.size[0], rgb.size[1], 0, GL_RGB, GL_UNSIGNED_BYTE, rgbData)
-
-    glActiveTexture(GL_TEXTURE1)
-    DepthTexture = glGenTextures(1)
-    glBindTexture(GL_TEXTURE_2D, DepthTexture)
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR)
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR)
-    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB,
-                 depth.size[0], depth.size[1], 0, GL_RGB, GL_UNSIGNED_BYTE, depthData)
-
-    glUniform1i(uRGB, 0)
-    glUniform1i(uDepth, 1)
+    
 
     glEnable(GL_LIGHTING)
     lightZeroPosition = [0., 0., 20., 1.]
@@ -252,6 +251,31 @@ def makeList():
 def display():
     global multiplier
     global uMultiplier
+    global RGB
+    global Depth
+    global rgb
+    global depth
+
+    glEnable(GL_TEXTURE_2D)
+    glActiveTexture(GL_TEXTURE0)
+    RGBTexture = glGenTextures(1)
+    glBindTexture(GL_TEXTURE_2D, RGBTexture)
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR)
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR)
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB,
+                 rgb.size[0], rgb.size[1], 0, GL_RGB, GL_UNSIGNED_BYTE, rgbData)
+
+    glActiveTexture(GL_TEXTURE1)
+    DepthTexture = glGenTextures(1)
+    glBindTexture(GL_TEXTURE_2D, DepthTexture)
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR)
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR)
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB,
+                 depth.size[0], depth.size[1], 0, GL_RGB, GL_UNSIGNED_BYTE, depthData)
+
+    glUniform1i(uRGB, 0)
+    glUniform1i(uDepth, 1)
+
     glUniform1f(uMultiplier, multiplier)
     #print ("(" + str(Orientx) + ", " + str(Orienty) + ")")
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT)
