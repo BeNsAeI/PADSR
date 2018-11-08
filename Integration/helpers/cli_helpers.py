@@ -15,14 +15,22 @@ def _get_user_confirmation(question, default=False):
     answer = confirm(question, suffix) or default
     return answer
 
-def _get_user_input(text):
+def _get_user_input(text, default=None):
     '''
     Show a text and return a response from a user or None
     text: string - text to show
     '''
-    input_ = prompt(text)
+    if default:
+        to_print = text + " [Default is %s] " % default
+    else:
+        to_print = text
+
+    input_ = prompt(to_print)
+
     if input_:
         return input_
+    elif default:
+        return default
     return None
 
 def get_input_video_name():
@@ -64,7 +72,7 @@ def get_low_quality_option():
     '''
     TODO
     '''
-    low = _get_user_confirmation("Do you want to halve the frames aspect ratio? (may increase speed)")
+    low = _get_user_confirmation("Do you want to halve the frames aspect ratio? (may increase speed)", default=True)
     return low
 
 def get_step_value():
@@ -73,7 +81,8 @@ def get_step_value():
     '''
     step = None
     while not step:
-        step = _get_user_input("Step of reading frames (e.g. if step==3, every 3d frame will be taken for a depth map): ")
+        step = _get_user_input("Step of reading frames (e.g. if step==3, every 3d frame will be taken for a depth map): ",
+                default=1)
         try:
             step = int(step)
         except:
@@ -91,3 +100,20 @@ def get_fast_depthmap_option():
     '''
     fast = _get_user_confirmation("Use fast version of depth map creator? (may decrease quality)")
     return fast
+
+def get_command():
+    command = None
+    while not command:
+        command = _get_user_input("Choose command:\n  1) Save depthmap video;\n  2) Open 3d.\n To select command type 1 or 2: ")
+        if not command:
+            continue
+        try:
+            command = int(command)
+            if command != 1 and command != 2:
+                command = None
+                continue
+        except ValueError:
+            print "Please type 1 or 2"
+            command = None
+    return command
+

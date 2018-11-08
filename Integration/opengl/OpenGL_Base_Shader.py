@@ -1,31 +1,34 @@
 from OpenGL.GLUT import *
 from OpenGL.GLU import *
 from OpenGL.GL import *
-from OpenGL.GL.shaders import *
+import OpenGL.GL.shaders
 import random
-from math import *  # trigonometry
+import math
 import pygame  # just to get a display
 import sys
 import time
 import numpy
 import math
 from PIL import Image
+import os
+sys.path.append(os.path.join(os.path.dirname(__file__), '../..'))
+from Integration.Video_To_Depthmap.video_converter import VideoConverter
 
 name = 'OpenGL Python Scene'
 CameraPosx = 0
 CameraPosy = 0
 CameraPosz = 45
 Orientx = 0.0
-Orienty = 0.0
-multiplier = 0.0
+Orienty = 45.0
+multiplier = 5.0
 uMultiplier = None
 BoxList = None
-RGB = "rgb.jpg"
-Depth = "depth.jpg"
 rgb = None
 depth = None
 rgbData = None
 depthData = None
+converter = None
+frame_and_depth_map_gen = None
 uRGB = None
 uDepth = None
 
@@ -65,12 +68,12 @@ def keyboard(key, x, y):
         multiplier -= 0.25
     #print ("(" + str(Orientx) + ", " + str(Orienty) + ")")
 
-
-def main():
+def run_opengl(input_video, low, step, fast):
     glutInit(sys.argv)
     glutInitDisplayMode(GLUT_DOUBLE | GLUT_RGB | GLUT_DEPTH)
     glutInitWindowSize(640, 480)
     glutCreateWindow(name)
+    glutSetOption(GLUT_ACTION_ON_WINDOW_CLOSE, GLUT_ACTION_CONTINUE_EXECUTION)
     glutKeyboardFunc(keyboard)
     glClearColor(0., 0., 0., 1.)
     glShadeModel(GL_SMOOTH)
@@ -174,21 +177,15 @@ def main():
     glUniform1f(uShininess, 1)
 
     # set background texture
-    global RGB
-    global Depth
     global rgb
     global depth
     global rgbData
     global depthData
+    global converter
+    global frame_and_depth_map_gen
 
-    RGB = "rgb.jpg"
-    Depth = "depth.jpg"
-    rgb = Image.open(RGB)
-    rgbData = numpy.array(list(rgb.getdata()), numpy.uint8)
-    depth = Image.open(Depth)
-    depthData = numpy.array(list(depth.getdata()), numpy.uint8)
-
-    
+    converter = VideoConverter(input_video, low, step, fast)
+    frame_and_depth_map_gen = converter.get_frame_and_depth_map()
 
     glEnable(GL_LIGHTING)
     lightZeroPosition = [0., 0., 20., 1.]
@@ -250,13 +247,19 @@ def makeList():
 def display():
     global multiplier
     global uMultiplier
-    global RGB
     global Depth
     global rgb
+    global rgbData
     global depth
+    global depthData
+    global converter
+    global frame_and_depth_map_gen
 
-    #rgbData = funccall()
-    #depthData = funccall()
+    try:
+        depthData, rgbData = next(frame_and_depth_map_gen)
+    except StopIteration:
+        frame_and_depth_map_gen = converter.get_frame_and_depth_map()
+        depthData, rgbData = next(frame_and_depth_map_gen)
 
     glEnable(GL_TEXTURE_2D)
     glActiveTexture(GL_TEXTURE0)
@@ -265,7 +268,7 @@ def display():
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR)
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR)
     glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB,
-                 rgb.size[0], rgb.size[1], 0, GL_RGB, GL_UNSIGNED_BYTE, rgbData)
+                 rgbData.shape[1], rgbData.shape[0], 0, GL_RGB, GL_UNSIGNED_BYTE, rgbData)
 
     glActiveTexture(GL_TEXTURE1)
     DepthTexture = glGenTextures(1)
@@ -273,7 +276,7 @@ def display():
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR)
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR)
     glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB,
-                 depth.size[0], depth.size[1], 0, GL_RGB, GL_UNSIGNED_BYTE, depthData)
+                 depthData.shape[1], depthData.shape[0], 0, GL_RGB, GL_UNSIGNED_BYTE, depthData)
 
     glUniform1i(uRGB, 0)
     glUniform1i(uDepth, 1)
@@ -294,4 +297,4 @@ def display():
 
 
 if __name__ == '__main__':
-    main()
+    run_opengl(os.path.dirname(os.path.abspath(__file__))+"/../Video_To_Depthmap/test.mp4", True, 1, False)
