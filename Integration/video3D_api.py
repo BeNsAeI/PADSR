@@ -1,42 +1,58 @@
 import sys, os
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), 'Video_To_Depthmap/')))
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), 'Direction_detection/')))
+sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), 'OpenGL_python/')))
 from video_converter import VideoConverter
-import subprocess
-import cv2
-
-
-def main():
-
-    three_d_video_creator = ThreeDimensionVideo()
-    three_d_video_creator.get_depthmap_video("data/test.avi", "data/test_output.avi")
-    three_d_video_creator.call_shader_subprocess("./out")
+from video_converter_2 import VideoConverter2
+from Shader import ShaderProcessor
 
 
 class ThreeDimensionVideo(object):
 
     def __init__(self):
         self.depthmapConverter = VideoConverter()
+        self.depthmapConverter2 = VideoConverter2()
+        self.shaderProcessor = ShaderProcessor()
 
     def get_depthmap_video(self, input_video, output_video):
         """
         Convert input video to depthmap video.
 
-        TODO: should use dependency injection for VideoConverter object.
         """   
 
         self.depthmapConverter.convert_video(input_video, output_video, True, False, 1, True)
+
+    def get_frame_data(self, input_video, high_quality = False, step = 1, fast = True):
+        """
+        Return the iterator of video frame collection and depthmap image collection.       
+        """
+        frameList, depthList = self.depthmapConverter2.convert_data(input_video, high_quality, step, fast)
+        return iter(frameList), iter(depthList)
+
+
+    def getNextFrame(self, list_iter):
+        """
+        Function to get next image on the list via the list_iter
+        """
+        try:
+            return list_iter.next()
+        except StopIteration:
+            return None
+        
+
+    def getVertexShader(self):
+        """
+        Create vertex shader
+        """
+        return self.shaderProcessor.createVertexShader()
+
     
-
-    def call_shader_subprocess(self, pathToRoutine):
+    def getFragmentShader(self):
         """
-        Function to call C++ subroutine to create shader from depthMap video.
-        """
-        # path to subprocess executing file
-        args = (pathToRoutine)
+        Create fragment shader
+        """ 
+        return self.shaderProcessor.createFragmentShader()
 
-        popen = subprocess.Popen(args, stdout=subprocess.PIPE)
-        popen.wait()
 
     def getDepthImage(self, imageLeft, imageRight, fast = False):
         """
@@ -44,6 +60,4 @@ class ThreeDimensionVideo(object):
         """
         self.depthmapConverter.create_depth_map(imageLeft, imageRight, fast)
 
-if __name__ == "__main__":
-    main()
     

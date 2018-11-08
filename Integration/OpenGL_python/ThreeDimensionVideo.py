@@ -30,7 +30,9 @@ uDepth = None
 print("Python OpenGL version: " + str(OpenGL.__version__))
 
 converter = VideoConverter2()
-frameList, depthmapList = converter.convert_video("test.mp4", "out.pm4", True, False, 1, True)
+print ("Creating Frames and Depthmaps...")
+frameList, depthmapList = converter.convert_video("test.mp4", True, 1, False)
+print("Finished. Contructing video...")
 
 frameList_iter = iter(frameList)
 depthmapList_iter = iter(depthmapList)
@@ -40,17 +42,6 @@ def getNextFrame(list_iter):
         return list_iter.next()
     except StopIteration:
         return None
-
-def createAndCompileShader(type, source):
-    shader = glCreateShader(type)
-    glShaderSource(shader, source)
-    glCompileShader(shader)
-    result = glGetShaderiv(shader, GL_COMPILE_STATUS)
-    if (result != 1):  # shader didn't compile
-        raise Exception(
-            "Couldn't compile shader\nShader compilation Log:\n"+glGetShaderInfoLog(shader))
-    return shader
-
 
 def keyboard(key, x, y):
     global Orientx

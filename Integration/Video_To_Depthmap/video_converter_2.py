@@ -40,7 +40,7 @@ class VideoConverter2(object):
     def __init__(self):
         pass
 
-    def convert_video(self, input_file, output_file, high_quality, low_quality, step, fast):
+    def convert_data(self, input_file, high_quality, step, fast):
         """
         Convert input video to a depthmap video.
         Currently only MP4 format is supported.
@@ -57,14 +57,9 @@ class VideoConverter2(object):
         # checking arguments
         if step <= 0:
             raise ValueError("Step should be greater than 0")
-        if high_quality and low_quality:
-            raise ValueError("Please choose either high or low quality, but not both")
         if not os.access(input_file, os.R_OK):
             raise ValueError("Please check that file %s exists." % input_file)
-        out_dir = os.path.dirname(output_file)
-        if out_dir and not os.access(out_dir, os.W_OK):
-            raise ValueError("Cannot write to directory %s. Check the permissions or choose another directory" % out_dir)
-
+        
         capture = cv2.VideoCapture(input_file)
         if not capture or not capture.isOpened():
             raise ValueError("Failed to read file %s" % input_file)
@@ -74,16 +69,9 @@ class VideoConverter2(object):
         if high_quality:
             width *= 2
             height *= 2
-        elif low_quality:
+        else:
             width /= 2
             height /= 2
-
-        # Set the output video parameters
-        fourcc = cv2.VideoWriter_fourcc(*'DIVX')
-        fps = capture.get(cv2.CAP_PROP_FPS)
-
-        is_color = 0 # save depth map video in grayscale
-        out = cv2.VideoWriter(output_file, fourcc, fps, (width, height), is_color)
 
         previous_frame = None
         next_frame = None
@@ -102,13 +90,13 @@ class VideoConverter2(object):
                     #print "No frames to read, exit loop"
                     break
                 
-                frameList.append(next_frame)
+                frameList.append(next_frame[...,::-1])
 
             if next_frame is None:
                 break
 
             frame_count += step
-            #print "Processing frame_%s" % frame_count
+            
             # Resize a frame
             next_frame = cv2.resize(next_frame, (width, height), interpolation=cv2.INTER_LINEAR)
 
@@ -129,15 +117,11 @@ class VideoConverter2(object):
                 # Create a depth map
                 depth_map = self.create_depth_map(previous_frame, next_frame, fast)
                 depthmapList.append(depth_map)
-                # Write the result to video file
-                out.write(depth_map)
+                
                 depthmap_count += 1
 
             previous_frame = next_frame
 
-        #print "Finished video processing. Frames: %s, Depth maps: %s" % (frame_count, depthmap_count)
-
-        out.release()
         capture.release()
         #cv2.destroyAllWindows()
 
