@@ -73,7 +73,6 @@ def run_opengl(input_video, low, step, fast):
     glutInitDisplayMode(GLUT_DOUBLE | GLUT_RGB | GLUT_DEPTH)
     glutInitWindowSize(640, 480)
     glutCreateWindow(name)
-    glutSetOption(GLUT_ACTION_ON_WINDOW_CLOSE, GLUT_ACTION_CONTINUE_EXECUTION)
     glutKeyboardFunc(keyboard)
     glClearColor(0., 0., 0., 1.)
     glShadeModel(GL_SMOOTH)

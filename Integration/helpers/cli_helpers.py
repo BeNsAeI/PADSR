@@ -72,7 +72,7 @@ def get_low_quality_option():
     '''
     TODO
     '''
-    low = _get_user_confirmation("Do you want to halve the frames aspect ratio? (may increase speed)", default=True)
+    low = _get_user_confirmation("Do you want to quarter the frames aspect ratio? (may increase speed)", default=True)
     return low
 
 def get_step_value():
