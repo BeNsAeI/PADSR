@@ -1,5 +1,5 @@
-#ifndef NETWORK
-#define NETWORK
+#ifndef NETWORK_H
+#define NETWORK_H
 #include <vector>
 
 class Network{
@@ -9,7 +9,8 @@ public:
 	std::vector<float> sigmoid (const std::vector<float>& m1);
 	std::vector<float> sigmoid_d (const std::vector<float>& m1);
 	std::vector<float> transpose (float *m, const int C, const int R);
-	void print(const std::vector<float>& m, int n_rows, int n_columns);
+	void print(const std::vector<float>& y, const std::vector<float>& m, int n_rows, int n_columns);
+	void print_W(const std::vector<float>& w, int n_rows, int n_columns);
 };
 
 std::vector<float> operator-(const std::vector<float>& m1, const std::vector<float>& m2);

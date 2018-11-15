@@ -1,8 +1,11 @@
 #include <iostream>
 #include <vector>
-#include "network.h"
 #include <math.h>
 #include <cmath>
+#include "network.h"
+#include "color.h"
+#include "const.h"
+
 Network::Network()
 {
 	#ifdef DEBUG
@@ -52,15 +55,37 @@ std::vector<float> Network::transpose (float *m, const int C, const int R)
 	}
 	return mT;
 }
-void Network::print(const std::vector<float>& m, int n_rows, int n_columns)
+void Network::print(const std::vector<float>& y, const std::vector<float>& m, int n_rows, int n_columns)
 {
 	for( int i = 0; i != n_rows; ++i ) {
+		printf(ANSI_COLOR_YELLOW ">> ");
 		for( int j = 0; j != n_columns; ++j ) {
-			std::cout << m[ i * n_columns + j ] << " ";
+			printf("%.*f", ND, y[i * n_columns + j]);
+			printf(ANSI_COLOR_BLUE " ->");
+			if (y[i * n_columns + j] == round(m[i * n_columns + j])) printf(ANSI_COLOR_GREEN " ");
+			else printf(ANSI_COLOR_RED " ");
+			printf("%.*f", ND,  m[ i * n_columns + j ]);
 		}
-		std::cout << '\n';
+		printf("\n" ANSI_COLOR_RESET);
 	}
 	std::cout << std::endl;
+}
+void Network::print_W(const std::vector<float>& w, int n_rows, int n_columns)
+{
+	#ifdef DEBUG
+		std::cout << n_rows << ", " << n_columns << std::endl;
+	#endif
+	for(int i = 0; i < n_rows; i++)
+	{
+		printf(ANSI_COLOR_YELLOW ">> " ANSI_COLOR_BLUE);
+		for(int j = 0; j < n_columns; j++)
+		{
+			printf("%.*f", ND,w[i * n_columns + j]);
+			if( j < n_columns - 1)
+				printf(", ");
+		}
+		printf("\n" ANSI_COLOR_RESET);
+	}
 }
 std::vector<float> operator-(const std::vector<float>& m1, const std::vector<float>& m2)
 {
