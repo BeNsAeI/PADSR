@@ -7,3 +7,5 @@ debug:
 	g++ simpleC-NN.cpp network.cpp -g -Wall -DDEBUG -std=c++11 -o out
 	gdb out
 	clear
+clean:
+	rm out

@@ -48,11 +48,15 @@ std::vector<float> Network::sigmoid_d (const std::vector<float>& m1)
 std::vector<float> Network::transpose (float *m, const int C, const int R)
 {
 	std::vector<float> mT (C*R);
-	for(int n = 0; n!=C*R; n++) {
+	/*for(int n = 0; n < C*R; n++) {
 		int i = n/C;
 		int j = n%C;
 		mT[n] = m[R*j + i];
-	}
+		
+	}*/
+	for(int i = 0; i < C; i++)
+		for(int j = 0;  j< R; j++)
+			mT[R * i + j] = m[C * j + i];
 	return mT;
 }
 void Network::print(const std::vector<float>& y, const std::vector<float>& m, int n_rows, int n_columns)
@@ -62,7 +66,7 @@ void Network::print(const std::vector<float>& y, const std::vector<float>& m, in
 		for( int j = 0; j != n_columns; ++j ) {
 			printf("%.*f", ND, y[i * n_columns + j]);
 			printf(ANSI_COLOR_BLUE " ->");
-			if (y[i * n_columns + j] == round(m[i * n_columns + j])) printf(ANSI_COLOR_GREEN " ");
+			if (y[i * n_columns + j] == roundf(m[i * n_columns + j]*powf(10,float(ND)-1))/powf(10,float(ND)-1)) printf(ANSI_COLOR_GREEN " ");
 			else printf(ANSI_COLOR_RED " ");
 			printf("%.*f", ND,  m[ i * n_columns + j ]);
 		}
@@ -75,10 +79,10 @@ void Network::print_W(const std::vector<float>& w, int n_rows, int n_columns)
 	#ifdef DEBUG
 		std::cout << n_rows << ", " << n_columns << std::endl;
 	#endif
-	for(int i = 0; i < n_rows; i++)
+	for(int i = 0; i < n_rows; ++i)
 	{
 		printf(ANSI_COLOR_YELLOW ">> " ANSI_COLOR_BLUE);
-		for(int j = 0; j < n_columns; j++)
+		for(int j = 0; j < n_columns; ++j)
 		{
 			printf("%.*f", ND,w[i * n_columns + j]);
 			if( j < n_columns - 1)

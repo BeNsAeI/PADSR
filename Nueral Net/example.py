@@ -1,39 +1,75 @@
 import torch
 import torch.nn as nn
-import torch.nn.functional as F
 
+X = torch.tensor(([2, 9], [1, 5], [3, 6]), dtype=torch.float) # 3 X 2 tensor
+y = torch.tensor(([92], [100], [89]), dtype=torch.float) # 3 X 1 tensor
+xPredicted = torch.tensor(([4, 8]), dtype=torch.float) # 1 X 2 tensor
 
-class Net(nn.Module):
+print(X.size())
+print(y.size())
 
-    def __init__(self):
-        super(Net, self).__init__()
-        # 1 input image channel, 6 output channels, 5x5 square convolution
-        # kernel
-        self.conv1 = nn.Conv2d(1, 6, 5)
-        self.conv2 = nn.Conv2d(6, 16, 5)
-        # an affine operation: y = Wx + b
-        self.fc1 = nn.Linear(16 * 5 * 5, 120)
-        self.fc2 = nn.Linear(120, 84)
-        self.fc3 = nn.Linear(84, 10)
+# scale units
+X_max, _ = torch.max(X, 0)
+xPredicted_max, _ = torch.max(xPredicted, 0)
 
-    def forward(self, x):
-        # Max pooling over a (2, 2) window
-        x = F.max_pool2d(F.relu(self.conv1(x)), (2, 2))
-        # If the size is a square you can only specify a single number
-        x = F.max_pool2d(F.relu(self.conv2(x)), 2)
-        x = x.view(-1, self.num_flat_features(x))
-        x = F.relu(self.fc1(x))
-        x = F.relu(self.fc2(x))
-        x = self.fc3(x)
-        return x
+X = torch.div(X, X_max)
+xPredicted = torch.div(xPredicted, xPredicted_max)
+y = y / 100  # max test score is 100
 
-    def num_flat_features(self, x):
-        size = x.size()[1:]  # all dimensions except the batch dimension
-        num_features = 1
-        for s in size:
-            num_features *= s
-        return num_features
+class Neural_Network(nn.Module):
+	def __init__(self, ):
+		super(Neural_Network, self).__init__()
+		# parameters
+		# TODO: parameters can be parameterized instead of declaring them here
+		self.inputSize = 2
+		self.outputSize = 1
+		self.hiddenSize = 3
 
+		# weights
+		self.W1 = torch.randn(self.inputSize, self.hiddenSize) # 3 X 2 tensor
+		self.W2 = torch.randn(self.hiddenSize, self.outputSize) # 3 X 1 tensor
 
-net = Net()
-print(net)
+	def forward(self, X):
+		self.z = torch.matmul(X, self.W1) # 3 X 3 ".dot" does not broadcast in PyTorch
+		self.z2 = self.sigmoid(self.z) # activation function
+		self.z3 = torch.matmul(self.z2, self.W2)
+		o = self.sigmoid(self.z3) # final activation function
+		return o
+		
+	def sigmoid(self, s):
+		return 1 / (1 + torch.exp(-s))
+
+	def sigmoidPrime(self, s):
+		# derivative of sigmoid
+		return s * (1 - s)
+
+	def backward(self, X, y, o):
+		self.o_error = y - o # error in output
+		self.o_delta = self.o_error * self.sigmoidPrime(o) # derivative of sig to error
+		self.z2_error = torch.matmul(self.o_delta, torch.t(self.W2))
+		self.z2_delta = self.z2_error * self.sigmoidPrime(self.z2)
+		self.W1 += torch.matmul(torch.t(X), self.z2_delta)
+		self.W2 += torch.matmul(torch.t(self.z2), self.o_delta)
+		
+	def train(self, X, y):
+		# forward + backward pass for training
+		o = self.forward(X)
+		self.backward(X, y, o)
+
+	def saveWeights(self, model):
+		# we will use the PyTorch internal storage functions
+		torch.save(model, "NN")
+		# you can reload model with all the weights and so forth with:
+		# torch.load("NN")
+		
+	def predict(self):
+		print ("Predicted data based on trained weights: ")
+		print ("Input (scaled): \n" + str(xPredicted))
+		print ("Output: \n" + str(self.forward(xPredicted)))
+
+NN = Neural_Network()
+for i in range(1000):  # trains the NN 1,000 times
+	#print ("#" + str(i) + " Loss: " + str(torch.mean((y - NN(X))**2).detach().item()))  # mean sum squared loss
+	NN.train(X, y)
+NN.saveWeights(NN)
+NN.predict()
