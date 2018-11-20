@@ -4,6 +4,9 @@
 #include <vector>
 #include <cmath>
 #include <math.h>
+#ifdef PARALLAL
+	#include <omp.h>
+#endif
 #include "network.h"
 #include "data.h"
 #include "const.h"
@@ -17,6 +20,10 @@ using std::vector;
 
 int main(int argc, char ** argv)
 {
+	#ifdef PARALLAL
+		omp_set_num_threads(omp_get_max_threads());
+		//omp_set_num_threads(1);
+	#endif
 	printf(ANSI_COLOR_CYAN "Listing Parameters: \n" ANSI_COLOR_RESET);
 	printf("Data sizes are: X: (%dx%d), Y: (%dx1), W: (%dx1).\n",(int)Y.size(), (int)X.size()/(int)Y.size(), (int)Y.size(), (int)W.size());
 	int xRows = (int)Y.size();
