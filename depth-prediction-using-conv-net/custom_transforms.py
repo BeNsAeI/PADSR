@@ -20,7 +20,7 @@ class ResizeImgAndDepth(object):
         
     def __call__(self, sample):
         img = Image.fromarray(sample['image'],  'RGB').resize(self.size)
-        depth = Image.fromarray(sample['depth'], 'L').resize(self.size)
+        depth = Image.fromarray(sample['depth'], 'L').resize((self.size[0]//2, self.size[1]//2))
         
         return { 'image' : np.array(img), 'depth' : np.array(depth) }
 
