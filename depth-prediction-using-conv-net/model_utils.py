@@ -3,7 +3,7 @@ import torch.nn as nn
 import torchvision
 device = torch.device('cuda:0' if torch.cuda.is_available() else 'cpu')
 import numpy as np
-from logger import Logger
+#from logger import Logger
 
 def freeze_all_layers(model):
     for param in model.parameters():
