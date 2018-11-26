@@ -32,38 +32,16 @@ def plot_depth_tensor_in_subplot(ax, depth_tensor):
     #pil_im = Image.fromarray(im, 'L')
     ax.imshow(im,'gray')
     
-def tensor_to_scalar(t):
-    if t.dim()==0:
-        return t.item()
-    else:
-        return t.numpy()    
+def plot_model_predictions_on_sample_batch(images, depths, preds, plot_from=0, figsize=(12,12)):
+    n_items=5
+    fig, axes = plt.subplots(n_items, 3, figsize=figsize)
     
-#plots used in largest item classifier 
-def plot_trn_image_with_annotations(im_id, jpeg_dic, JPEG_DIR, annotations_dic, category_dic, figsize=(10, 10)):
-    fig, ax = plt.subplots(1, figsize=figsize)
-    show_img_in_subplot(ax, Image.open(JPEG_DIR/jpeg_dic[im_id]['file_name']))
-    hide_subplot_axes(ax)
+    for i in range(n_items):
+        plot_image_tensor_in_subplot(axes[i,0], images[plot_from+i])
+        plot_depth_tensor_in_subplot(axes[i,1], depths[plot_from+i])
+        plot_depth_tensor_in_subplot(axes[i,2], preds[plot_from+i])
+        hide_subplot_axes(axes[i,0])
+        hide_subplot_axes(axes[i,1])
+        hide_subplot_axes(axes[i,2])
     
-    annotations = [annotations_dic[im_id]] if(type(annotations_dic[im_id]) == tuple) else annotations_dic[im_id]
-        
-    for ann in annotations:
-        plot_bbox_annotation(ax, ann[0], category_dic[ann[1]])
-        
-    plt.show()
-
-def plot_model_predictions_on_sample_batch(batch, pred_labels, actual_labels, get_label_fn, n_items=12, plot_from=0, figsize=(16,12)):
-    n_rows, n_cols = (1,n_items) if n_items<=4 else (math.ceil(n_items/4), 4)
-    
-    fig, axes = plt.subplots(n_rows, n_cols, figsize=figsize)
-    for i,ax in enumerate(axes.flat):
-        plot_idx = plot_from + i
-        plot_image_tensor_in_subplot(ax, batch[plot_idx])
-
-        pred_label = get_label_fn(tensor_to_scalar(pred_labels[plot_idx])) 
-        actual_label = get_label_fn(tensor_to_scalar(actual_labels[plot_idx]))  
-
-        hide_subplot_axes(ax)
-        add_text_to_subplot(ax, (0,0), 'Pred: '+pred_label)
-        add_text_to_subplot(ax, (0,30), 'Actual: '+actual_label, color='yellow')
-
     plt.tight_layout()
