@@ -1,0 +1,4 @@
+data/
+*.ckpt
+.ipynb_checkpoints/
+DIW-model/.ipynb_checkpoints/

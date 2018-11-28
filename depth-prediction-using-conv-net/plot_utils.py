@@ -32,8 +32,9 @@ def plot_depth_tensor_in_subplot(ax, depth_tensor):
     #pil_im = Image.fromarray(im, 'L')
     ax.imshow(im,'gray')
     
-def plot_model_predictions_on_sample_batch(images, depths, preds, plot_from=0, figsize=(12,12)):
-    n_items=5
+def plot_model_predictions_on_sample_batch(images, depths, preds, figsize=(18,18)):
+    n_items=len(images)
+    plot_from=0
     fig, axes = plt.subplots(n_items, 3, figsize=figsize)
     
     for i in range(n_items):
