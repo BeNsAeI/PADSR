@@ -4,7 +4,6 @@ import torch
 from torch.autograd import Variable
 from torchvision import transforms
 from Integration.Neural_Network.DIW_transforms import get_tfms
-from DIW_transforms import get_tfms
 import numpy as np 
 from Integration.Neural_Network.models.hourglass import Model
 import cv2 

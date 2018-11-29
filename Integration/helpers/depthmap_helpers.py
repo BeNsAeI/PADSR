@@ -1,7 +1,11 @@
 import cv2
 from Integration.Image_Depth_Generator.Advanced import DepthMapCreator
 from Integration.Image_Depth_Generator.Fast import DepthMapCreator_2
-def create_depth_map(img_left, img_right, fast):
+
+import Integration.Neural_Network.DIW_transforms
+from Integration.Neural_Network.nn2 import get_depth_image_using_CNN
+
+def create_depth_map(img_left, img_right, fast, nn):
     """
     Convert left image and right image into depth map image.
     Need to pick a good set of matcher parameter to create
@@ -11,6 +15,11 @@ def create_depth_map(img_left, img_right, fast):
 
     Output: depth map image
     """
+
+    if nn:
+        print("Create Depth maps using CNN")
+        return get_depth_image_using_CNN(img_left, img_right)
+
     matcher_parameters = init_matcher_parameters(windowSize=5,
             minDisparity=0,
             numDisparities=16 * 3,

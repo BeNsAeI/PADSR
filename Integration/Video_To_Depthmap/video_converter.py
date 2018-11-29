@@ -50,7 +50,8 @@ class VideoConverter(object):
                         print "Camera moves to the right"
 
                     # Create a depth map
-                    depth_map = create_depth_map(previous_frame, next_frame, self.fast)
+                    # In order to use the CNN replace False by True
+                    depth_map = create_depth_map(previous_frame, next_frame, self.fast, False)
                     depth_map = cv2.cvtColor(depth_map, cv2.COLOR_GRAY2RGB)
 
                 else:
