@@ -51,7 +51,7 @@ def save_depthmap_video():
         converter = VideoConverter(input_video, low, step, fast, nn)
         converter.convert_video(output_video)
     except ValueError as err:
-        print "===============> Error: ", err
+        print("===============> Error: ", err)
 
 def show_executable():
     input_video = get_input_video_name()#**prompt_settings)
@@ -77,7 +77,7 @@ def show_executable():
     try:
         run_opengl(input_video, low, step, fast, nn)
     except ValueError as err:
-        print "===============> Error: ", err
+        print("===============> Error: ", err)
 
 if __name__ == '__main__':
     main()

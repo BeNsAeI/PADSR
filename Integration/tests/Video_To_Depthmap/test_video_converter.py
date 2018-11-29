@@ -104,24 +104,24 @@ def test_depthmaps_large_step(mocked_video_reader, mocked_file_check, mocked_cv2
 def test_performance():
     tester = Tester()
     test_converter = VideoConverter("../Video to image/test.mp4", True, 1, False)
-    print "Creating an instance..."
-    print "setting up class Video_To_Depthmap..."
+    print("Creating an instance...")
+    print("setting up class Video_To_Depthmap...")
     tester.init_class_tracker(VideoConverter)
     tester.init_output_file_check()
-    print "creating a an instance of test class"
-    print "__________"
-    print "Timing test:"
+    print("creating a an instance of test class")
+    print("__________")
+    print("Timing test:")
     tester.startTimer()
     test_converter.convert_video("out.mp4")
     tester.stopTimer()
-    print "checking object size, memory and profile:"
+    print("checking object size, memory and profile:")
     tester.check_object_size(test_converter)
     tester.print_object_profile(test_converter)
     tester.track_object()
-    print "__________"
-    print "checking Class size, memory and profile:"
+    print("__________")
+    print("checking Class size, memory and profile:")
     tester.snapshot_class()
     tester.get_class_summary()
-    print "__________"
-    print "checking for output files added:"
-    print "so far there have been "+str(tester.output_file_count())+" files added."
+    print("__________")
+    print("checking for output files added:")
+    print("so far there have been "+str(tester.output_file_count())+" files added.")

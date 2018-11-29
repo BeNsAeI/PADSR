@@ -64,24 +64,25 @@ def test_image_path_not_given():
 def test_performance():
     tester = Tester()
     depth_map_creator = CreateDepthMap()
-    print "Creating an instance..."
-    print "setting up class tracking..."
+    print("Creating an instance...")
+    print("setting up class tracking...")
     tester.init_class_tracker(CreateDepthMap)
     tester.init_output_file_check()
-    print "creating a an instance of test class"
-    print "__________"
-    print "Timing test:"
+    print("creating a an instance of test class")
+    print("__________")
+    print("Timing test:")
     tester.startTimer()
     depth_map_creator.get_depth_image("../Image to depth map/Opencv example/ambush_5_left.jpg", "../Image to depth map/Opencv example/ambush_5_right.jpg")
     tester.stopTimer()
-    print "checking object size, memory and profile:"
+    print("checking object size, memory and profile:")
     tester.check_object_size(depth_map_creator)
     tester.print_object_profile(depth_map_creator)
     tester.track_object()
-    print "__________"
-    print "checking Class size, memory and profile:"
+    print("__________")
+    print("checking Class size, memory and profile:")
     tester.snapshot_class()
     tester.get_class_summary()
-    print "__________"
-    print "checking for output files added:"
-    print "so far there have been "+str(tester.output_file_count())+" files added."
+    print("__________")
+    print("checking for output files added:")
+    print("so far there have been "+str(tester.output_file_count())+" files
+    added.")

@@ -45,7 +45,7 @@ class VideoReader(object):
 
 
     def __exit__(self, exc_type, exc_value, traceback):
-        print "Destroying VideoCapture object"
+        print("Destroying VideoCapture object")
         self._capture.release()
         del self._capture
         del self.fps
@@ -63,7 +63,7 @@ class VideoReader(object):
             # Capture frame-by-frame
             ret, next_frame = self._capture.read()
             if not ret:
-                print "No frames to read, exit loop"
+                print("No frames to read, exit loop")
                 break
 
             if next_frame is None:
@@ -76,4 +76,4 @@ class VideoReader(object):
 
             frame_count += 1
             yield next_frame
-        print "VideoReader finished reading frames. Total frames in video: %d" % frame_count
+        print("VideoReader finished reading frames. Total frames in video: %d" % frame_count)

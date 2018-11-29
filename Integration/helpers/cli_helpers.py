@@ -120,7 +120,7 @@ def get_command():
                 command = None
                 continue
         except ValueError:
-            print "Please type 1 or 2"
+            print("Please type 1 or 2")
             command = None
     return command
 

@@ -51,11 +51,11 @@ class VideoConverter(object):
 
                     flow = cv2.calcOpticalFlowFarneback(prev_frame_gr, next_frame_gr, None, 0.5, 3, 15, 3, 5, 1.2, 0)
                     if flow[..., 0].sum() > 0:
-                        print "Camera moves to the left"
+                        print("Camera moves to the left")
                         # swapping left and right images
                         previous_frame, next_frame = next_frame, previous_frame
                     else:
-                        print "Camera moves to the right"
+                        print("Camera moves to the right")
 
                     # Create a depth map
                     # In order to use the CNN replace False by True
