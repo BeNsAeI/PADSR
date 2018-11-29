@@ -8,13 +8,15 @@ class VideoReader(object):
     VideoCapture object will be automatically destroyed
     after getting out of the with code block.
     '''
-    def __init__(self, input_file, low_quality):
+    def __init__(self, input_file, low_quality, size):
         '''
         input_file: string - name of input video file that will be readed
         low_quality: bool - if true, frames dimensions will be halved
         '''
+
+        if low_quality and size:
+            raise ValueError("Please provide either a fized size or a low-quality option")
         self.input_file = input_file
-        self.low_quality = low_quality
 
         if not check_file_exists(input_file):
             raise ValueError("Please check that file %s exists." % input_file)
@@ -28,9 +30,15 @@ class VideoReader(object):
         self.width = int(self._capture.get(cv2.CAP_PROP_FRAME_WIDTH))
         self.height = int(self._capture.get(cv2.CAP_PROP_FRAME_HEIGHT))
 
-        if self.low_quality:
+        self.resize = True
+        if low_quality:
             self.width /= 4
             self.height /= 4
+        elif size:
+            self.width = size[0]
+            self.height = size[1]
+        else:
+            self.resize = False
 
     def __enter__(self):
         return self
@@ -47,7 +55,7 @@ class VideoReader(object):
     def get_next_frame(self):
         '''
         Generator that returns a new frame on each call
-        if low_quality is enabled, frames are returned with halved quality
+        if self.resize is True, frames are returned with halved quality
         '''
         frame_count = 0 # for debugging
         next_frame = None
@@ -61,7 +69,7 @@ class VideoReader(object):
             if next_frame is None:
                 break
 
-            if self.low_quality:
+            if self.resize:
                 # Resize a frame
                 next_frame = cv2.resize(next_frame, (self.width, self.height), interpolation=cv2.INTER_LINEAR)
                 next_frame = cv2.cvtColor(next_frame, cv2.COLOR_BGR2RGB)

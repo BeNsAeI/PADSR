@@ -6,23 +6,31 @@ from Integration.Video_To_Depthmap.video_reader import VideoReader
 from Integration.helpers.file_system_helpers import check_file_exists, check_dir_write_access
 
 class VideoConverter(object):
-    def __init__(self, input_file, low_quality, step, fast):
+    def __init__(self, input_file, low_quality, step, fast, nn):
         """
         input_file: string - name of the video that will be converted to a depthmap video
         low_quality: bool - if true, frames dimensions will be halved
         step: int - step of reading frames, e.g. if step==3, every third frame
             will be taken for creating a depth map
         fast: bool - if true, fast depthmap function will be used
+        nn: bool - if true, neural net depthmap function will be used
         """
 
         # checking arguments
         if step <= 0:
             raise ValueError("Step should be greater than 0")
+        if fast and nn:
+            raise ValueError("Please choose either fast or neural net depthmap")
         self.input_file = input_file
         self.low_quality = low_quality
         self.step = step
         self.fast = fast
+        self.neural_net = nn
         self.video_reader = None
+        self.size = None
+
+        if self.neural_net:
+            self.size = (320, 240)
 
     def _get_frame(self, video_reader):
         previous_frame = None
@@ -51,7 +59,7 @@ class VideoConverter(object):
 
                     # Create a depth map
                     # In order to use the CNN replace False by True
-                    depth_map = create_depth_map(previous_frame, next_frame, self.fast, False)
+                    depth_map = create_depth_map(previous_frame, next_frame, self.fast, self.neural_net)
                     depth_map = cv2.cvtColor(depth_map, cv2.COLOR_GRAY2RGB)
 
                 else:
@@ -73,7 +81,7 @@ class VideoConverter(object):
             raise ValueError("Cannot write to directory to save %s file. Check permissions or choose another path",
                     output_file)
 
-        with VideoReader(self.input_file, self.low_quality) as video_reader:
+        with VideoReader(self.input_file, self.low_quality, self.size) as video_reader:
             width = video_reader.width
             height = video_reader.height
 
@@ -90,7 +98,7 @@ class VideoConverter(object):
             out.release()
 
     def get_frame_and_depth_map(self):
-        with VideoReader(self.input_file, self.low_quality) as video_reader:
+        with VideoReader(self.input_file, self.low_quality, self.size) as video_reader:
             for depth_map, next_frame in self._get_frame(video_reader):
                 yield depth_map, next_frame
 

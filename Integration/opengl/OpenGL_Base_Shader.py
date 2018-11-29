@@ -68,7 +68,7 @@ def keyboard(key, x, y):
         multiplier -= 0.25
     #print ("(" + str(Orientx) + ", " + str(Orienty) + ")")
 
-def run_opengl(input_video, low, step, fast):
+def run_opengl(input_video, low, step, fast, nn):
     glutInit(sys.argv)
     glutInitDisplayMode(GLUT_DOUBLE | GLUT_RGB | GLUT_DEPTH)
     glutInitWindowSize(640, 480)
@@ -183,7 +183,7 @@ def run_opengl(input_video, low, step, fast):
     global converter
     global frame_and_depth_map_gen
 
-    converter = VideoConverter(input_video, low, step, fast)
+    converter = VideoConverter(input_video, low, step, fast, nn)
     frame_and_depth_map_gen = converter.get_frame_and_depth_map()
 
     glEnable(GL_LIGHTING)

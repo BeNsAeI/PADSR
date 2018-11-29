@@ -17,8 +17,9 @@ def create_depth_map(img_left, img_right, fast, nn):
     """
 
     if nn:
+        size = (img_left.shape[1], img_left.shape[0])
         print("Create Depth maps using CNN")
-        return get_depth_image_using_CNN(img_left, img_right)
+        return get_depth_image_using_CNN(img_left, img_right, size)
 
     matcher_parameters = init_matcher_parameters(windowSize=5,
             minDisparity=0,

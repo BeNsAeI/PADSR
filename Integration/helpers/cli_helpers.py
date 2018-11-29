@@ -101,6 +101,13 @@ def get_fast_depthmap_option():
     fast = _get_user_confirmation("Use fast version of depth map creator? (may decrease quality)")
     return fast
 
+def get_nn_depthmap_option():
+    '''
+    TODO
+    '''
+    nn = _get_user_confirmation("Use a neural network to generate depthmap?")
+    return nn
+
 def get_command():
     command = None
     while not command:
