@@ -32,8 +32,8 @@ class VideoReader(object):
 
         self.resize = True
         if low_quality:
-            self.width /= 4
-            self.height /= 4
+            self.width = int(self.width / 4)
+            self.height = int(self.height / 4)
         elif size:
             self.width = size[0]
             self.height = size[1]
