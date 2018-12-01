@@ -8,10 +8,8 @@ from Integration.opengl.OpenGL_Base_Shader import run_opengl
 
 def main():
     '''
-    TODO
+    Command-line interface.
     '''
-    # do we need id?
-    # prompt_settings = dict(history=FileHistory('.cli_history'), auto_suggest=AutoSuggestFromHistory())
 
     try:
         while True:

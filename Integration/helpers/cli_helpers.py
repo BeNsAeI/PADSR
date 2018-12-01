@@ -35,7 +35,8 @@ def _get_user_input(text, default=None):
 
 def get_input_video_name():
     '''
-    TODO
+    Asks user to provide a filename of input video.
+    return: string - filename of input video provided by a user.
     '''
     input_video = None
     while not input_video:
@@ -50,7 +51,8 @@ def get_input_video_name():
 
 def get_output_video_name():
     '''
-    TODO
+    Asks user to provide a filename of output video.
+    return: string - filename of output video provided by a user.
     '''
     output_video = None
     while not output_video:
@@ -70,14 +72,17 @@ def get_output_video_name():
 
 def get_low_quality_option():
     '''
-    TODO
+    Asks if user wants to quarter the frames aspect ratio
+    return: bool - true if user decides to quarter the frames aspect ratio,
+    otherwise false
     '''
     low = _get_user_confirmation("Do you want to quarter the frames aspect ratio? (may increase speed)", default=True)
     return low
 
 def get_step_value():
     '''
-    TODO
+    Asks user to specify a frame step
+    return: int - frame step specified by a user.
     '''
     step = None
     while not step:
@@ -96,19 +101,25 @@ def get_step_value():
 
 def get_fast_depthmap_option():
     '''
-    TODO
+    Asks if user wants to generate a depth map using fast method.
+    return: bool - true if user decides to use fast depthmap, otherwise false
     '''
     fast = _get_user_confirmation("Use fast version of depth map creator? (may decrease quality)")
     return fast
 
 def get_nn_depthmap_option():
     '''
-    TODO
+    Asks if user wants to generate a depth map using neural network.
+    return: bool - true if user decides to use neural-net depthmap, otherwise false
     '''
     nn = _get_user_confirmation("Use a neural network to generate depthmap?")
     return nn
 
 def get_command():
+    '''
+    Asks user to select a command
+    return: int - number that represents a command
+    '''
     command = None
     while not command:
         command = _get_user_input("Choose command:\n  1) Save depthmap video;\n  2) Open 3d.\n To select command type 1 or 2: ")
