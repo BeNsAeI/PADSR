@@ -34,9 +34,8 @@ def test_constructor(mocked_file_check, mocked_cv2):
     # mock check_file_exists() to make file 'available'
     mocked_file_check.return_value = True
 
-    with VideoReader(input_file, low_quality) as video_reader:
+    with VideoReader(input_file, low_quality, None) as video_reader:
         assert video_reader.input_file == input_file
-        assert video_reader.low_quality == low_quality
 
 @mock.patch('Integration.Video_To_Depthmap.video_reader.cv2')
 @mock.patch('Integration.Video_To_Depthmap.video_reader.check_file_exists')
@@ -50,8 +49,7 @@ def test_low_quality_endabled(mocked_file_check, mocked_cv2):
     # mock check_file_exists() to make file 'available'
     mocked_file_check.return_value = True
 
-    with VideoReader(input_file, low_quality) as video_reader:
-        assert video_reader.low_quality == low_quality
+    with VideoReader(input_file, low_quality, None) as video_reader:
         assert video_reader.width == _MOCK_WIDTH / 4
         assert video_reader.height == _MOCK_HEIGHT / 4
 
@@ -67,7 +65,6 @@ def test_low_quality_disabled(mocked_file_check, mocked_cv2):
     # mock check_file_exists() to make file 'available'
     mocked_file_check.return_value = True
 
-    with VideoReader(input_file, low_quality) as video_reader:
-        assert video_reader.low_quality == low_quality
+    with VideoReader(input_file, low_quality, None) as video_reader:
         assert video_reader.width == _MOCK_WIDTH
         assert video_reader.height == _MOCK_HEIGHT

@@ -24,7 +24,7 @@ def test_constructor(mocked_video_reader, mocked_file_check):
     step = 10
     low_quality = False
     fast = True
-    test_converter = VideoConverter(input_file, low_quality, step, fast)
+    test_converter = VideoConverter(input_file, low_quality, step, fast, False)
     assert test_converter.input_file == input_file
     assert test_converter.low_quality == low_quality
     assert test_converter.step == step
@@ -43,7 +43,7 @@ def test_one_frame(mocked_video_reader, mocked_file_check, mocked_cv2, mocked_de
     mocked_file_check.return_value = True
 
     # call tested method
-    test_converter = VideoConverter("any_input", False, 1, True)
+    test_converter = VideoConverter("any_input", False, 1, True, False)
     test_converter.convert_video("any_output")
 
     assert mocked_depth_map_func.called == False
@@ -55,7 +55,7 @@ def test_file_not_found(mocked_depth_map_func):
     Verify that function raises error if input does not exist
     '''
     with pytest.raises(ValueError):
-        test_converter = VideoConverter("any_input", False, 1, True)
+        test_converter = VideoConverter("any_input", False, 1, True, False)
         test_converter.convert_video("any_output")
 
 @mock.patch('Integration.Video_To_Depthmap.video_converter.check_file_exists') # mock os to skip checking if files exist
@@ -67,11 +67,11 @@ def test_depthmaps_step_0(mocked_file_check):
     mocked_file_check.return_value = True
     # call convert_video with step 0 and check that it returns ValueError
     with pytest.raises(ValueError):
-        VideoConverter("any_input", False, 0, True)
+        VideoConverter("any_input", False, 0, True, False)
 
     # call convert_video with step -1 and check that it returns ValueError
     with pytest.raises(ValueError):
-        VideoConverter("any_input", False, -1, True)
+        VideoConverter("any_input", False, -1, True, False)
 
 @mock.patch('Integration.Video_To_Depthmap.video_converter.create_depth_map')
 @mock.patch('Integration.Video_To_Depthmap.video_converter.cv2')
@@ -94,7 +94,7 @@ def test_depthmaps_large_step(mocked_video_reader, mocked_file_check, mocked_cv2
     # mock of VideoWriter object
     mocked_writer = mocked_cv2.VideoWriter.return_value
 
-    test_converter = VideoConverter("any_input", False, total_frames_count+1, True)
+    test_converter = VideoConverter("any_input", False, total_frames_count+1, True, False)
 
     # call convert_video with step > total_frames_count and check that it doesn't save anything
     test_converter.convert_video("any_output")
@@ -103,7 +103,7 @@ def test_depthmaps_large_step(mocked_video_reader, mocked_file_check, mocked_cv2
 @pytest.mark.skip(reason="input video should be added to run this test")
 def test_performance():
     tester = Tester()
-    test_converter = VideoConverter("../Video to image/test.mp4", True, 1, False)
+    test_converter = VideoConverter("../Video to image/test.mp4", True, 1, False, False)
     print("Creating an instance...")
     print("setting up class Video_To_Depthmap...")
     tester.init_class_tracker(VideoConverter)

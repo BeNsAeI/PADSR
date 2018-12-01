@@ -84,5 +84,4 @@ def test_performance():
     tester.get_class_summary()
     print("__________")
     print("checking for output files added:")
-    print("so far there have been "+str(tester.output_file_count())+" files
-    added.")
+    print("so far there have been "+str(tester.output_file_count())+" files added.")
