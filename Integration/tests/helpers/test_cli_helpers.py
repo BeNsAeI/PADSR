@@ -185,10 +185,20 @@ def test_step_zero(mocked_user_input):
     mocked_user_input.side_effect = [0, _EXPECTED_STEP]
     assert cli_helpers.get_step_value() == _EXPECTED_STEP
 
+@mock.patch('Integration.helpers.cli_helpers._get_user_confirmation')
+def test_nn_depthmap_false(mocked_confirm):
+    '''
+    Verify that get_nn_depthmap_option returns False if user decided not to
+    enable the nn depthmap option
+    '''
+    mocked_confirm.return_value = False
+    assert not cli_helpers.get_nn_depthmap_option()
 
-'==========================================='
-
-
-
-def test_video_converter_failed():
-    pass
+@mock.patch('Integration.helpers.cli_helpers._get_user_confirmation')
+def test_nn_depthmap_true(mocked_confirm):
+    '''
+    Verify that get_nn_depthmap_option returns True if user decided to
+    enable the nn depthmap option
+    '''
+    mocked_confirm.return_value = True
+    assert cli_helpers.get_nn_depthmap_option()

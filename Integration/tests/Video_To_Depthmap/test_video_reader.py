@@ -68,3 +68,40 @@ def test_low_quality_disabled(mocked_file_check, mocked_cv2):
     with VideoReader(input_file, low_quality, None) as video_reader:
         assert video_reader.width == _MOCK_WIDTH
         assert video_reader.height == _MOCK_HEIGHT
+
+@mock.patch('Integration.Video_To_Depthmap.video_reader.cv2')
+@mock.patch('Integration.Video_To_Depthmap.video_reader.check_file_exists')
+def test_size_specified(mocked_file_check, mocked_cv2):
+    input_file = 'test_file_name'
+    step = 10
+    low_quality = False
+    size = (10, 20)
+
+    # mock VideoCapture object
+    mock_video_capture(mocked_cv2, 1)
+    # mock check_file_exists() to make file 'available'
+    mocked_file_check.return_value = True
+
+    with VideoReader(input_file, low_quality, size) as video_reader:
+        assert video_reader.width == size[0]
+        assert video_reader.height == size[1]
+
+@mock.patch('Integration.Video_To_Depthmap.video_reader.cv2')
+@mock.patch('Integration.Video_To_Depthmap.video_reader.check_file_exists')
+def test_size_and_low_quality_endabled(mocked_file_check, mocked_cv2):
+    '''
+    If low quality enabled and size is provided, constructor should raise an
+    exception
+    '''
+    input_file = 'test_file_name'
+    step = 10
+    low_quality = True
+    size = (1, 1)
+
+    # mock VideoCapture object
+    mock_video_capture(mocked_cv2, 1)
+    # mock check_file_exists() to make file 'available'
+    mocked_file_check.return_value = True
+
+    with pytest.raises(ValueError):
+        vr = VideoReader(input_file, low_quality, size)

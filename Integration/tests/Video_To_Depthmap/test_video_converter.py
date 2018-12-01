@@ -100,6 +100,16 @@ def test_depthmaps_large_step(mocked_video_reader, mocked_file_check, mocked_cv2
     test_converter.convert_video("any_output")
     assert mocked_writer.write.call_count == 0
 
+@mock.patch('Integration.Video_To_Depthmap.video_converter.create_depth_map')
+def test_nn_and_low_quality_endabled(mocked_depthmap):
+    '''
+    If low quality and neural network options are enabled, constructor should raise an
+    exception
+    '''
+
+    with pytest.raises(ValueError):
+        vc = VideoConverter("input_file", False, 1, True, True)
+
 @pytest.mark.skip(reason="input video should be added to run this test")
 def test_performance():
     tester = Tester()
