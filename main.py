@@ -73,8 +73,10 @@ def Task_print_w(args):
 	return error_code
 
 def Task_diagnostics(args):
+	global schedule
 	Task_print_w(["Running Diagnostics ...", CC.Header, True])
 	errors = []
+	schedule = []
 	return errors
 
 def Task_re_schedule(args):
@@ -82,12 +84,32 @@ def Task_re_schedule(args):
 	Task_print_w(["Rescheduling task: " + args[2], CC.Header, True])
 	schedule.append(args)
 
+def Task_manager(args):
+	global schedule
+	Task_print_w(["Running Task Manager ...", CC.Header, True])
+	return 0
+
+# To-Do:
+# - Initiate and test camera
+# - Initiate and test Lidar
+# - Initiate and test Bluetooth controller
+# - Initiate and test controls and movement
+# - Initiate and test stream
+# - Initiate Manager
+# - initiate and wait for user input
+
 def Task_initialize(args):
 	global schedule
 	schedule = []
 	Task_print_w(["Initializing ...", CC.Header, True])
-	schedule.append([Task_impossible, [1], "Trying to do something impossible", Priority.TRY, False])
-	print schedule
+	#schedule.append([<TASK>, [<ARGS>], "<TASK NAME>", Priority.<PRIORITY>, <QUITE>])
+	schedule.append([Task_impossible, [1], "TRY impossible task", Priority.TRY, False])
+	schedule.append([Task_print_w, ["test 1", CC.Warning], "MEDIUM priority print test", Priority.MEDIUM, False])
+	schedule.append([Task_print_w, ["test 2", CC.Warning], "LOW priority print test", Priority.LOW, False])
+	schedule.append([Task_print_w, ["test 3", CC.Warning], "IDLE priority print test", Priority.IDLE, False])
+	schedule.append([Task_print_w, ["test 4", CC.Warning], "TRY priority print test", Priority.TRY, False])
+	schedule.append([Task_manager, [], "Lunching Manager", Priority.HIGH, False])
+	Task_print_w(["Initial tasks were scheduled.", CC.Pass, True])
 
 def Task_lunch(task, args, task_name, priority = Priority.IDLE, quite = True):
 	try:
@@ -120,32 +142,48 @@ def Task_lunch(task, args, task_name, priority = Priority.IDLE, quite = True):
 def main():
 	global schedule
 	Task_lunch(Task_initialize,[], "Initializing", Priority.HIGH, quite = False)
-	Task_print_w(["Executing HIGH priority scheduled items", CC.Normal])
-	for i in schedule:
-		if i[3] == Priority.HIGH:
-			Task_lunch(i[0], i[1], i[2], i[3], quite=i[4])
+	while len(schedule) != 0:
+		
+		Task_print_w(["Executing HIGH priority scheduled items", CC.Normal])
+		i = 0
+		while (i < len(schedule)) and (i > -1):
+			if schedule[i][3] == Priority.HIGH:
+				Task_lunch(schedule[i][0], schedule[i][1], schedule[i][2], schedule[i][3], quite=schedule[i][4])
+				schedule.remove(schedule[i])
+			i += 1
 
-	Task_print_w(["Executing MEDIUM priority scheduled items", CC.Normal])
-	for i in schedule:
-		if i[3] == Priority.MEDIUM:
-			Task_lunch(i[0], i[1], i[2], i[3], quite=i[4])
-
-	Task_print_w(["Executing LOW priority scheduled items", CC.Normal])
-	for i in schedule:
-		if i[3] == Priority.LOW:
-			Task_lunch(i[0], i[1], i[2], i[3], quite=i[4])
-
-	Task_print_w(["Executing IDLE priority scheduled items", CC.Normal])
-	for i in schedule:
-		if i[3] == Priority.IDLE:
-			Task_lunch(i[0], i[1], i[2], i[3], quite=i[4])
-
-	Task_print_w(["Executing TRY priority scheduled items", CC.Normal])
-	for i in schedule:
-		if i[3] == Priority.TRY:
-			Task_lunch(i[0], i[1], i[2], i[3], quite=i[4])
+		Task_print_w(["Executing MEDIUM priority scheduled items", CC.Normal])
+		i = 0
+		while (i < len(schedule)) and (i > -1):
+			if schedule[i][3] == Priority.MEDIUM:
+				Task_lunch(schedule[i][0], schedule[i][1], schedule[i][2], schedule[i][3], quite=schedule[i][4])
+				schedule.remove(schedule[i])
+			i += 1
 
 
+		Task_print_w(["Executing LOW priority scheduled items", CC.Normal])
+		i = 0
+		while (i < len(schedule)) and (i > -1):
+			if schedule[i][3] == Priority.LOW:
+				Task_lunch(schedule[i][0], schedule[i][1], schedule[i][2], schedule[i][3], quite=schedule[i][4])
+				schedule.remove(schedule[i])
+			i += 1
+
+		Task_print_w(["Executing IDLE priority scheduled items", CC.Normal])
+		i = 0
+		while (i < len(schedule)) and (i > -1):
+			if schedule[i][3] == Priority.IDLE:
+				Task_lunch(schedule[i][0], schedule[i][1], schedule[i][2], schedule[i][3], quite=schedule[i][4])
+				schedule.remove(schedule[i])
+			i += 1
+
+		Task_print_w(["Executing TRY priority scheduled items", CC.Normal])
+		i = 0
+		while (i < len(schedule)) and (i > -1):
+			if schedule[i][3] == Priority.TRY:
+				Task_lunch(schedule[i][0], schedule[i][1], schedule[i][2], schedule[i][3], quite=schedule[i][4])
+				schedule.remove(schedule[i])
+			i += 1
 
 if __name__ == '__main__':
 	main()
