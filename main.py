@@ -24,6 +24,8 @@ class Priority:
 	IDLE = 4
 	TRY = 5
 
+is_shutting_down = False
+#is_shutting_down = True
 schedule = []
 
 def Task_impossible(args):
@@ -42,7 +44,6 @@ def Task_print_w(args):
 		is_bold = args[2]
 	if len(args) > 3:
 		is_underline = args[3]
-
 	error_code = 0
 	tmp_str = ""
 	if code == CC.Normal:
@@ -85,6 +86,41 @@ def Task_re_schedule(args):
 	Task_print_w(["Rescheduling task: " + args[2], CC.Header, True])
 	schedule.append(args)
 
+def Task_setup_camera(args):
+	Task_print_w(["Setting Up Camera... ", CC.Header])
+	Task_print_w(["Done! ", CC.Pass])
+	return 0
+
+def Task_setup_lidar(args):
+	Task_print_w(["Setting Up Lidar... ", CC.Header])
+	Task_print_w(["Done! ", CC.Pass])
+	return 0
+
+def Task_setup_bluetooth(args):
+	Task_print_w(["Setting Up Bluetooth... ", CC.Header])
+	Task_print_w(["Done! ", CC.Pass])
+	return 0
+
+def Task_setup_controls(args):
+	Task_print_w(["Setting Up Controls... ", CC.Header])
+	Task_print_w(["Done! ", CC.Pass])
+	return 0
+
+def Task_test_controls(args):
+	Task_print_w(["Testing Controls... ", CC.Header])
+	Task_print_w(["Done! ", CC.Pass])
+	return 0
+
+def Task_setup_stream(args):
+	Task_print_w(["Setting Up Stream... ", CC.Header])
+	Task_print_w(["Done! ", CC.Pass])
+	return 0
+
+def Task_shutdown(args):
+	global is_shutting_down
+	is_shutting_down = True
+	return 0
+
 def Task_test_schedule(args):
 	schedule.append([Task_impossible, [1], "TRY impossible task", Priority.TRY, False])
 	schedule.append([Task_print_w, ["test 1", CC.Warning], "MEDIUM priority print test", Priority.MEDIUM, False])
@@ -96,20 +132,14 @@ Task_manager_Message = True
 
 def Task_manager(args):
 	global schedule
+	global is_shutting_down
 	global Task_manager_Message
 	if Task_manager_Message:
 		Task_print_w(["Running Task Manager ...", CC.Header, True])
 		Task_manager_Message = False
+	if is_shutting_down:
+		schedule = []
 	return 0
-
-# To-Do:
-# - Initiate and test camera
-# - Initiate and test Lidar
-# - Initiate and test Bluetooth controller
-# - Initiate and test controls and movement
-# - Initiate and test stream
-# - Initiate Manager
-# - initiate and wait for user input
 
 def Task_initialize(args):
 	global schedule
@@ -117,7 +147,15 @@ def Task_initialize(args):
 	Task_print_w(["Initializing ...", CC.Header, True])
 	#schedule.append([<TASK>, [<ARGS>], "<TASK NAME>", Priority.<PRIORITY>, <QUITE>])
 	#Task_test_schedule([])
+	schedule.append([Task_setup_camera, [], "Initiating Camera", Priority.MEDIUM, False])
+	schedule.append([Task_setup_lidar, [], "Initiating Lidar", Priority.MEDIUM, False])
+	schedule.append([Task_setup_bluetooth, [], "Initiating Bluetooth controller", Priority.LOW, False])
+	schedule.append([Task_setup_controls, [], "Initiating controls and movement", Priority.LOW, False])
+	schedule.append([Task_test_controls, [], "Testing controls", Priority.IDLE, False])
+	schedule.append([Task_setup_stream, [], "Initiating stream", Priority.HIGH, False])
 	schedule.append([Task_manager, [], "Lunching Manager", Priority.AGENT, False])
+	schedule.append([Task_test_schedule, [], "Testing scheduler", Priority.HIGH, False])
+	schedule.append([Task_shutdown, [], "Schedule to shut down", Priority.TRY, False])
 	Task_print_w(["Initial tasks were scheduled.", CC.Pass, True])
 
 def Task_lunch(task, args, task_name, priority = Priority.IDLE, quite = True):
@@ -156,7 +194,7 @@ def Task_lunch(task, args, task_name, priority = Priority.IDLE, quite = True):
 def main():
 	global schedule
 	Task_lunch(Task_initialize,[], "Initializing", Priority.HIGH, quite = False)
-	while len(schedule) != 0:
+	while len(schedule) > 0:
 		#Task_print_w(["Executing AGENT priority scheduled items", CC.Normal])
 		i = 0
 		while (i < len(schedule)) and (i > -1):
@@ -171,7 +209,10 @@ def main():
 			if schedule[i][3] == Priority.HIGH:
 				Task_lunch(schedule[i][0], schedule[i][1], schedule[i][2], schedule[i][3], quite=schedule[i][4])
 				schedule.remove(schedule[i])
-			i += 1
+				i = 0
+			else:
+				i += 1
+
 
 		#Task_print_w(["Executing MEDIUM priority scheduled items", CC.Normal])
 		i = 0
@@ -179,8 +220,19 @@ def main():
 			if schedule[i][3] == Priority.MEDIUM:
 				Task_lunch(schedule[i][0], schedule[i][1], schedule[i][2], schedule[i][3], quite=schedule[i][4])
 				schedule.remove(schedule[i])
-			i += 1
+				i = 0
+			else:
+				i += 1
 
+		i = 0
+		while (i < len(schedule)) and (i > -1):
+			if schedule[i][3] == Priority.MEDIUM:
+				print i
+				print schedule
+				print schedule[i][2]
+				print schedule[i][3]
+				exit(1)
+			i += 1
 
 		#Task_print_w(["Executing LOW priority scheduled items", CC.Normal])
 		i = 0
@@ -188,7 +240,9 @@ def main():
 			if schedule[i][3] == Priority.LOW:
 				Task_lunch(schedule[i][0], schedule[i][1], schedule[i][2], schedule[i][3], quite=schedule[i][4])
 				schedule.remove(schedule[i])
-			i += 1
+				i = 0
+			else:
+				i += 1
 
 		#Task_print_w(["Executing IDLE priority scheduled items", CC.Normal])
 		i = 0
@@ -196,7 +250,9 @@ def main():
 			if schedule[i][3] == Priority.IDLE:
 				Task_lunch(schedule[i][0], schedule[i][1], schedule[i][2], schedule[i][3], quite=schedule[i][4])
 				schedule.remove(schedule[i])
-			i += 1
+				i = 0
+			else:
+				i += 1
 
 		#Task_print_w(["Executing TRY priority scheduled items", CC.Normal])
 		i = 0
@@ -204,7 +260,10 @@ def main():
 			if schedule[i][3] == Priority.TRY:
 				Task_lunch(schedule[i][0], schedule[i][1], schedule[i][2], schedule[i][3], quite=schedule[i][4])
 				schedule.remove(schedule[i])
-			i += 1
+				i = 0
+			else:
+				i += 1
+	return 0
 
 if __name__ == '__main__':
 	main()
