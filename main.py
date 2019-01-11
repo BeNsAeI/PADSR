@@ -1,3 +1,5 @@
+#!/usr/bin/env python
+
 class color_code:
 	HEADER = '\033[95m'
 	OKBLUE = '\033[94m'
@@ -27,6 +29,53 @@ class Priority:
 is_shutting_down = False
 #is_shutting_down = True
 schedule = []
+tilt_port = ''
+rpLidar_port = ''
+video_capture = None
+bd_addr = ''
+port = 1
+sock = None
+
+def Task_identify(args):
+	import time
+	import serial
+	from rplidar import RPLidar
+	import matplotlib.pyplot as plt
+	import numpy as np
+	import matplotlib.animation as animation
+	from subprocess import call
+	ser = serial.Serial(
+		port='/dev/ttyUSB1',
+		baudrate=9600,
+		parity=serial.PARITY_ODD,
+		stopbits=serial.STOPBITS_TWO,
+		bytesize=serial.SEVENBITS
+	)
+	ser.isOpen()
+	print "identifying the tilt/shift port..."
+	time.sleep(1)
+	ser.write('\r\n')
+	out = ''
+	# let's wait one second before reading output (let's give device time to answer)
+	time.sleep(1)
+	while ser.inWaiting() > 0:
+		out += ser.read(1)
+	if(out == 'Ready\r\n'):
+		port1='/dev/ttyUSB1'
+		port2='/dev/ttyUSB0'
+	else:
+		port1='/dev/ttyUSB0'
+		port2='/dev/ttyUSB1'
+	print("Tilt/shift Port Identified: "+ port1)
+	print("rpLidar Port Identified: "+ port2)
+	ser.close()
+	if args[0] == "stand alone":
+		global tilt_port
+		global rpLidar_port
+		tilt_port = port1
+		rpLidar_port = port2
+	elif args[0] == "return":
+		return port1,port2
 
 def Task_impossible(args):
 	Task_print_w(["Doing the imposible!", CC.Warning, True])
@@ -74,11 +123,30 @@ def Task_print_w(args):
 	print (tmp_str)
 	return error_code
 
+def Task_Navigate(args):
+	from subprocess import call
+	from multiprocessing import Process
+	import time
+	angle = args[0]
+	distance = args[1]
+	call_args = ["python", "Navigate.py",str(angle), str(distance)]
+	p = Process(target=call, args=(call_args,))
+	p.start()
+	Task_print_w(["Navigation was scheduled in OS ...", CC.Header, True])
+
 def Task_diagnostics(args):
 	global schedule
+	global sock
 	Task_print_w(["Running Diagnostics ...", CC.Header, True])
+	Task_print_w(["Cooling down for 5 seconds ...", CC.Header, True])
+	import time
+	time.sleep(5)
 	errors = []
 	schedule = []
+	sock.close()
+	schedule.append([Task_test_schedule, [], "Testing scheduler integrity", Priority.HIGH, False])
+	schedule.append([Task_identify, ["stand alone"], "re-identifying pereferals", Priority.HIGH, False])
+	schedule.append([Task_initialize, [], "re-initialize software", Priority.HIGH, False])
 	return errors
 
 def Task_re_schedule(args):
@@ -88,6 +156,52 @@ def Task_re_schedule(args):
 
 def Task_setup_camera(args):
 	Task_print_w(["Setting Up Camera... ", CC.Header])
+	import cv2
+	import numpy as np
+	global video_capture
+	if args[0] == "front":
+		video_capture = cv2.VideoCapture("nvcamerasrc ! video/x-raw(memory:NVMM), width=(int)640, height=(int)480, format=(string)I420, framerate=(fraction)30/1 ! nvvidconv ! video/x-raw, format=(string)BGRx ! videoconvert ! video/x-raw, format=(string)BGR ! appsink")
+	elif args[0] == "dynamic":
+		video_capture = cv2.VideoCapture(1)
+	Task_print_w(["Done! ", CC.Pass])
+
+def Task_stream(args):
+	global video_capture
+	Task_print_w(["Streaming Camera... ", CC.Header])
+	import cv2
+	import numpy as np
+	if video_capture.isOpened():
+		windowName = "Stream"
+		cv2.namedWindow(windowName, cv2.WINDOW_NORMAL)
+		cv2.resizeWindow(windowName,1280,720)
+		cv2.moveWindow(windowName,0,0)
+		font = cv2.FONT_HERSHEY_PLAIN
+		showFullScreen = False
+		key = -1
+		while key != 1048689 and key != 1114081 and key != 1048603:
+			if cv2.getWindowProperty(windowName, 0) < 0:
+				cv2.destroyAllWindows()
+				video_capture.release()
+				break
+			ret_val, frame = video_capture.read()
+			hsv=cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
+			cv2.imshow(windowName,hsv)
+			key=cv2.waitKey(10)
+			if key == 27 or key == 'q' or key == 'Q': # Check for ESC or 'q' or 'Q' key
+				video_capture.release()
+				cv2.destroyAllWindows()
+				Task_print_w(["Camera stream terminated.", CC.Header])
+				break
+			#bluetooth controls sit here:
+			if sock != None:
+				tosend = raw_input()
+				if tosend != 'q':
+					sock.send(tosend)
+		video_capture.release()
+		cv2.destroyAllWindows()
+	else:
+		Task_print_w(["Camera failed!", CC.Failed])
+		exit(1)
 	Task_print_w(["Done! ", CC.Pass])
 	return 0
 
@@ -98,6 +212,16 @@ def Task_setup_lidar(args):
 
 def Task_setup_bluetooth(args):
 	Task_print_w(["Setting Up Bluetooth... ", CC.Header])
+	global bd_addr
+	global port
+	global sock
+	import bluetooth
+	import sys
+	bd_addr = "20:16:10:31:46:89"
+	port = 1
+	sock = bluetooth.BluetoothSocket( bluetooth.RFCOMM )
+	sock.connect((bd_addr, port))
+	sock.settimeout(10.0)
 	Task_print_w(["Done! ", CC.Pass])
 	return 0
 
@@ -108,6 +232,8 @@ def Task_setup_controls(args):
 
 def Task_test_controls(args):
 	Task_print_w(["Testing Controls... ", CC.Header])
+	tosend = "www sss aaa ddd"
+	sock.send(tosend)
 	Task_print_w(["Done! ", CC.Pass])
 	return 0
 
@@ -147,14 +273,16 @@ def Task_initialize(args):
 	Task_print_w(["Initializing ...", CC.Header, True])
 	#schedule.append([<TASK>, [<ARGS>], "<TASK NAME>", Priority.<PRIORITY>, <QUITE>])
 	#Task_test_schedule([])
-	schedule.append([Task_setup_camera, [], "Initiating Camera", Priority.MEDIUM, False])
+	schedule.append([Task_identify, ["stand alone"], "Identifying pereferals", Priority.HIGH, False])
+	schedule.append([Task_setup_camera, ["dynamic"], "Initiating Camera", Priority.MEDIUM, False])
 	schedule.append([Task_setup_lidar, [], "Initiating Lidar", Priority.MEDIUM, False])
-	schedule.append([Task_setup_bluetooth, [], "Initiating Bluetooth controller", Priority.LOW, False])
+	#schedule.append([Task_setup_bluetooth, [], "Initiating Bluetooth controller", Priority.LOW, False])
 	schedule.append([Task_setup_controls, [], "Initiating controls and movement", Priority.LOW, False])
 	schedule.append([Task_test_controls, [], "Testing controls", Priority.IDLE, False])
 	schedule.append([Task_setup_stream, [], "Initiating stream", Priority.HIGH, False])
 	schedule.append([Task_manager, [], "Lunching Manager", Priority.AGENT, False])
-	schedule.append([Task_test_schedule, [], "Testing scheduler", Priority.HIGH, False])
+	schedule.append([Task_test_schedule, [], "Testing scheduler integrity", Priority.HIGH, False])
+	schedule.append([Task_stream, [], "Initiating Camera", Priority.IDLE, False])
 	schedule.append([Task_shutdown, [], "Schedule to shut down", Priority.TRY, False])
 	Task_print_w(["Initial tasks were scheduled.", CC.Pass, True])
 
