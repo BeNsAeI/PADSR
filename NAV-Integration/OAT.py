@@ -20,7 +20,7 @@ spring_activation_radious = sphere_radious * 8
 sphere_coord = [-13.0,-13.0,0.0]
 variance = 25.0
 rand_sphere_coords = []
-sphere_force = 10.0
+sphere_force = 15.0
 global_k = 1.0
 destination_threshold = sphere_radious * 6
 def main():
