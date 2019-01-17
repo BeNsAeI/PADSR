@@ -3,7 +3,7 @@ from Integration.Image_Depth_Generator.Advanced import DepthMapCreator
 from Integration.Image_Depth_Generator.Fast import DepthMapCreator_2
 
 import Integration.Neural_Network.DIW_transforms
-from Integration.Neural_Network.nn2 import get_depth_image_using_CNN
+#from Integration.Neural_Network.nn2 import get_depth_image_using_CNN
 
 def create_depth_map(img_left, img_right, fast, nn):
     """
