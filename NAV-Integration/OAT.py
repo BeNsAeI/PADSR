@@ -64,7 +64,7 @@ def vector(destination):
 	if math.sqrt( (destination[0]-sphere_coord[0])**2 + (destination[1]-sphere_coord[1])**2 ) < destination_threshold:
 		vector_x = 0
 		vector_y = 0
-		print "Done!"
+		print ("Done!")
 		exit(0)
 	else:
 		R = math.sqrt( (destination[0]-sphere_coord[0])**2 + (destination[1]-sphere_coord[1])**2 )
