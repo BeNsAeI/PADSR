@@ -20,17 +20,18 @@ spring_activation_radious = sphere_radious * 8
 sphere_coord = [-13.0,-13.0,0.0]
 variance = 25.0
 rand_sphere_coords = []
-sphere_force = 16.0
-global_k = 1.0
+sphere_force = 15
+global_k = 1.50
 destination_threshold = sphere_radious * 6
 def main():
 
 	#setting up obstacles:
 	global rand_sphere_coords
-	rand_sphere_coords = np.random.rand(sphere_count,2)
+	rand_sphere_coords = np.random.rand(sphere_count,3)
 	for i in rand_sphere_coords:
 		i[0] = i[0] * variance - variance/2
 		i[1] = i[1] * variance - variance/2
+		i[2] = spring_activation_radious
 	glutInit(sys.argv)
 	glutInitDisplayMode(GLUT_DOUBLE | GLUT_RGB | GLUT_DEPTH)
 	glutInitWindowSize(400,400)
@@ -76,26 +77,37 @@ def vector(destination):
 def spring(destination):
 	nearby_spheres = []
 	for i in rand_sphere_coords:
-		if math.sqrt( (i[0]-sphere_coord[0])**2 + (i[1]-sphere_coord[1])**2 ) < spring_activation_radious:
-			nearby_spheres.append([i[0],i[1]])
+		if math.sqrt( (i[0]-sphere_coord[0])**2 + (i[1]-sphere_coord[1])**2 ) < spring_activation_radious * 2:
+			nearby_spheres.append([i[0],i[1],i[2]])
 	force = 0
 	force_x = vector(destination)[0]
 	force_y = vector(destination)[1]
+	for i in range(0,len(nearby_spheres)-1):
+		if abs(nearby_spheres[i][0] - nearby_spheres[i+1][0]) < spring_activation_radious/2 and\
+		abs(nearby_spheres[i][1] - nearby_spheres[i+1][1]) < spring_activation_radious/2:
+			nearby_spheres[i][2] = nearby_spheres[i][2] + \
+								   math.sqrt( abs(nearby_spheres[i][0] - nearby_spheres[i+1][0]) ** 2 + abs(nearby_spheres[i][1] - nearby_spheres[i+1][1]) ** 2)
+			nearby_spheres[i+1][2] = nearby_spheres[i][2]
+			nearby_spheres[i][0] = (nearby_spheres[i][0] + nearby_spheres[i+1][0])/2
+			nearby_spheres[i+1][0] = nearby_spheres[i][0]
+			nearby_spheres[i][1] = (nearby_spheres[i][1] + nearby_spheres[i+1][1])/2
+			nearby_spheres[i+1][1] = nearby_spheres[i][1]
+
 	for i in nearby_spheres:
-		glPushMatrix()
-		color = [1.0,1.0,0.0,1.0]
-		glMaterialfv(GL_FRONT,GL_DIFFUSE,color)
-		glTranslatef(i[0], i[1], 0)
-		glutSolidSphere(sphere_radious*1.25,sphere_poly,sphere_poly)
-		glPopMatrix()
-		
-		k = global_k
-		R = math.sqrt( (i[0]-sphere_coord[0])**2 + (i[1]-sphere_coord[1])**2 )
-		if i[0] != sphere_coord[0]:
-			d_x = abs(spring_activation_radious * sphere_coord[0])/R - abs(i[0] - sphere_coord[0])
-			d_y = abs(spring_activation_radious * sphere_coord[1])/R - abs(i[1] - sphere_coord[1])
-		force_x -= (i[0] - sphere_coord[0])/R * (k * d_x)
-		force_y -= (i[1] - sphere_coord[1])/R * (k * d_y)
+		#if math.sqrt( (i[0]-sphere_coord[0])**2 + (i[1]-sphere_coord[1])**2 ) < spring_activation_radious:
+			glPushMatrix()
+			color = [0.0625,0.0625,0.0625,0.0625]
+			glMaterialfv(GL_FRONT,GL_DIFFUSE,color)
+			glTranslatef(i[0], i[1], -1)
+			glutSolidSphere(i[2],sphere_poly,sphere_poly)
+			glPopMatrix()
+			k = global_k
+			R = math.sqrt( (i[0]-sphere_coord[0])**2 + (i[1]-sphere_coord[1])**2 )
+			if i[0] != sphere_coord[0]:
+				d_x = abs(i[2] * sphere_coord[0])/R - abs(i[0] - sphere_coord[0])
+				d_y = abs(i[2] * sphere_coord[1])/R - abs(i[1] - sphere_coord[1])
+			force_x -= (i[0] - sphere_coord[0])/R * (k * d_x)
+			force_y -= (i[1] - sphere_coord[1])/R * (k * d_y)
 	return force_x, force_y
 
 def sphere_speed(destination):
@@ -121,14 +133,14 @@ def display():
 	glClear(GL_COLOR_BUFFER_BIT|GL_DEPTH_BUFFER_BIT)
 	animate()
 	glPushMatrix()
-	color = [0.0,1.0,0.0,1.0]
+	color = [0.5,1.0,0.5,1.0]
 	glMaterialfv(GL_FRONT,GL_DIFFUSE,color)
 	glTranslatef(sphere_coord[0],sphere_coord[1],sphere_coord[2])
 	glutSolidSphere(sphere_radious,sphere_poly,sphere_poly)
 	glPopMatrix()
 	for i in rand_sphere_coords:
 		glPushMatrix()
-		color = [1.0,0.0,0.0,1.0]
+		color = [1.0,0.5,0.5,1.0]
 		glMaterialfv(GL_FRONT,GL_DIFFUSE,color)
 		glTranslatef(i[0], i[1], 0)
 		glutSolidSphere(sphere_radious,sphere_poly,sphere_poly)
